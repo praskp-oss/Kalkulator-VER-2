@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Angsuran Kredit - Promo Free Admin As Loan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+        /* Custom scrollbar untuk tabel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background-color: white;
+            }
+            .print-shadow-none {
+                box-shadow: none !important;
+                border: 1px solid #e2e8f0 !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg">
+                    <i data-lucide="calculator" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-tight leading-none">KreditKalkulator Pro</h1>
+                    <p class="text-xs text-slate-400 mt-0.5">Skema: <span id="header-promo-label" class="text-emerald-400 font-semibold">FREE ADMIN (Admin Rp 0)</span></p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="copyWhatsAppSummary()" class="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-medium px-3 py-2 rounded-lg transition shadow-sm">
+                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Salin Penawaran WA</span>
+                    <span class="sm:hidden">Salin WA</span>
+                </button>
+                <button onclick="window.print()" class="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium px-3 py-2 rounded-lg border border-slate-700 transition">
+                    <i data-lucide="printer" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Cetak</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notifikasi Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none no-print">
+        <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-2.5 border border-slate-700">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+            <span id="toast-message" class="text-sm font-medium">Berhasil disalin!</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        
+        <!-- Pemilih Kategori Utama (Tabs) -->
+        <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200/80 mb-6 flex flex-col sm:flex-row gap-2 no-print">
+            <button id="tab-elektronik" onclick="switchCategory('elektronik')" class="flex-1 flex items-center justify-between px-5 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-blue-600 text-white shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 rounded-lg bg-white/20">
+                        <i data-lucide="tv" class="w-5 h-5"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-base font-bold">Pembiayaan Elektronik</div>
+                        <div class="text-xs font-normal opacity-90">TV, Kulkas, Mesin Cuci, AC, Furnitur</div>
+                    </div>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-white/20">Flat 23,88% p.a</span>
+            </button>
+
+            <button id="tab-gadget" onclick="switchCategory('gadget')" class="flex-1 flex items-center justify-between px-5 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 rounded-lg bg-slate-100 text-slate-600" id="icon-bg-gadget">
+                        <i data-lucide="smartphone" class="w-5 h-5"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-base font-bold">Pembiayaan Gadget</div>
+                        <div class="text-xs font-normal text-slate-500" id="sub-gadget">Smartphone, Tablet, Laptop</div>
+                    </div>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700" id="badge-gadget">Flat 23,88% p.a</span>
+            </button>
+        </div>
+
+        <!-- Bar Preset Database Referensi -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 mb-6 no-print">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-2 text-slate-700">
+                    <i data-lucide="database" class="w-4 h-4 text-blue-600"></i>
+                    <span class="text-xs sm:text-sm font-semibold">Muat Contoh Data Kontrak Aktual (Database):</span>
+                </div>
+                <div id="preset-buttons" class="flex flex-wrap gap-2">
+                    <!-- Diisi dinamis oleh JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Utama: Kiri (Input) & Kanan (Hasil & Jadwal) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- KOLOM KIRI: Form Parameter Simulasi (5 Kolom) -->
+            <div class="lg:col-span-5 space-y-6 no-print">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <div class="px-6 py-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
+                        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-600"></i>
+                            <span>Parameter Pengajuan</span>
+                        </h2>
+                        <span id="category-pill" class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-blue-100 text-blue-700">ELEKTRONIK</span>
+                    </div>
+
+                    <div class="p-6 space-y-5">
+                        <!-- Harga Barang (OTR) -->
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Harga Barang (Total OTR)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-sm">Rp</span>
+                                <input type="text" id="input-otr" value="7.520.000" oninput="handleCurrencyInput(this); autoCalculateFees(); syncAdminFromPercent(); syncAdminLainFromPercent(); calculateInstallment();" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-bold text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Uang Muka (DP) -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">Uang Muka (Down Payment)</label>
+                                <span id="dp-percent-label" class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">0% dari OTR</span>
+                            </div>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-sm">Rp</span>
+                                <input type="text" id="input-dp" value="0" oninput="handleCurrencyInput(this); calculateInstallment();" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-semibold text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition outline-none">
+                            </div>
+                            <div class="flex gap-1.5 mt-2">
+                                <button type="button" onclick="setDpPercent(0)" class="flex-1 py-1 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">DP 0%</button>
+                                <button type="button" onclick="setDpPercent(10)" class="flex-1 py-1 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">10%</button>
+                                <button type="button" onclick="setDpPercent(20)" class="flex-1 py-1 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">20%</button>
+                                <button type="button" onclick="setDpPercent(30)" class="flex-1 py-1 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">30%</button>
+                            </div>
+                        </div>
+
+                        <!-- Tenor -->
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Tenor Angsuran (Bulan)</label>
+                            <div class="grid grid-cols-5 gap-2" id="tenor-buttons">
+                                <button type="button" onclick="selectTenor(6)" data-tenor="6" class="tenor-btn py-2.5 rounded-xl text-sm font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition">6 Bln</button>
+                                <button type="button" onclick="selectTenor(9)" data-tenor="9" class="tenor-btn py-2.5 rounded-xl text-sm font-bold border border-blue-600 bg-blue-600 text-white shadow-sm transition">9 Bln</button>
+                                <button type="button" onclick="selectTenor(12)" data-tenor="12" class="tenor-btn py-2.5 rounded-xl text-sm font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition">12 Bln</button>
+                                <button type="button" onclick="selectTenor(15)" data-tenor="15" class="tenor-btn py-2.5 rounded-xl text-sm font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition">15 Bln</button>
+                                <button type="button" onclick="selectTenor(18)" data-tenor="18" class="tenor-btn py-2.5 rounded-xl text-sm font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition">18 Bln</button>
+                            </div>
+                        </div>
+
+                        <hr class="border-slate-200">
+
+                        <!-- Komponen Kapitalisasi NTF -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Biaya Kapitalisasi ke NTF</h3>
+                                    <p class="text-[11px] text-slate-500">Otomatis sesuai rasio database, dapat diubah manual</p>
+                                </div>
+                                <button type="button" onclick="autoCalculateFees(true); calculateInstallment();" class="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 bg-blue-50 px-2.5 py-1 rounded-lg">
+                                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                    <span>Reset Rasio</span>
+                                </button>
+                            </div>
+
+                            <div class="space-y-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                                <!-- Pilihan Skema Biaya Admin -->
+                                <div class="space-y-2 pb-2.5 border-b border-slate-200/80">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-semibold text-slate-700">Skema Biaya Admin</span>
+                                        <span id="admin-scheme-badge" class="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">FREE ADMIN</span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1.5">
+                                        <button type="button" onclick="selectAdminMode('free')" data-admin-mode="free" class="admin-mode-btn py-1.5 px-2 rounded-lg text-[11px] font-bold border border-blue-600 bg-blue-600 text-white shadow-sm transition">Free Admin</button>
+                                        <button type="button" onclick="selectAdminMode('as_loan')" data-admin-mode="as_loan" class="admin-mode-btn py-1.5 px-2 rounded-lg text-[11px] font-bold border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition">Admin As Loan</button>
+                                        <button type="button" onclick="selectAdminMode('upfront')" data-admin-mode="upfront" class="admin-mode-btn py-1.5 px-2 rounded-lg text-[11px] font-bold border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition">Bayar Awal</button>
+                                    </div>
+                                    <!-- Nominal Biaya Admin (Nominal Rp & Persentase %) -->
+                                    <div id="admin-fee-input-wrapper" class="pt-1 hidden">
+                                        <div class="flex justify-between text-xs mb-1">
+                                            <label class="text-slate-600 font-medium">Biaya Admin (% OTR / Nominal)</label>
+                                            <span id="admin-mode-hint" class="text-[10px] font-semibold text-blue-600">Masuk ke pokok NTF</span>
+                                        </div>
+                                        <div class="grid grid-cols-12 gap-1.5">
+                                            <div class="col-span-5 relative">
+                                                <input type="number" step="0.01" min="0" id="input-biaya-admin-pct" value="0" placeholder="0" oninput="handleAdminPercentInput(); calculateInstallment();" class="w-full pl-2.5 pr-6 py-1.5 bg-white border border-slate-300 rounded-lg text-blue-700 font-bold text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                                <span class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 text-xs font-bold">%</span>
+                                            </div>
+                                            <div class="col-span-7 relative">
+                                                <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-slate-400 text-xs font-semibold">Rp</span>
+                                                <input type="text" id="input-biaya-admin" value="0" oninput="handleDecimalCurrencyInput(this); syncAdminPercentFromNominal(); calculateInstallment();" class="w-full pl-7 pr-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-800 font-semibold text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-1.5 mt-1.5">
+                                            <button type="button" onclick="setQuickAdminPercent(2)" class="flex-1 py-1 text-[10px] font-semibold bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded transition">2%</button>
+                                            <button type="button" onclick="setQuickAdminPercent(3)" class="flex-1 py-1 text-[10px] font-semibold bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded transition">3%</button>
+                                            <button type="button" onclick="setQuickAdminPercent(5)" class="flex-1 py-1 text-[10px] font-semibold bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded transition">5%</button>
+                                            <button type="button" onclick="setQuickAdminFee(150000)" class="flex-1 py-1 text-[10px] font-semibold bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded transition">Rp 150rb</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Kolom Manual Admin Lain-lain -->
+                                <div class="space-y-1.5 pb-2 border-b border-slate-200/80">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <label for="input-admin-lain-pct" class="text-xs font-semibold text-slate-700">Biaya Admin Lain-lain (% / Manual)</label>
+                                        <select id="select-admin-lain-mode" onchange="calculateInstallment()" class="text-[11px] font-semibold bg-white border border-slate-300 rounded-md px-2 py-0.5 text-slate-700 focus:ring-1 focus:ring-blue-500 outline-none">
+                                            <option value="as_loan">Masuk NTF (As Loan)</option>
+                                            <option value="upfront">Bayar Awal (TDP)</option>
+                                        </select>
+                                    </div>
+                                    <div class="grid grid-cols-12 gap-1.5">
+                                        <div class="col-span-5 relative">
+                                            <input type="number" step="0.01" min="0" id="input-admin-lain-pct" value="0" placeholder="0" oninput="handleAdminLainPercentInput(); calculateInstallment();" class="w-full pl-2.5 pr-6 py-1.5 bg-white border border-slate-300 rounded-lg text-blue-700 font-bold text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                            <span class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 text-xs font-bold">%</span>
+                                        </div>
+                                        <div class="col-span-7 relative">
+                                            <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-slate-400 text-xs font-semibold">Rp</span>
+                                            <input type="text" id="input-admin-lain" value="0" placeholder="0" oninput="handleDecimalCurrencyInput(this); syncAdminLainPercentFromNominal(); calculateInstallment();" class="w-full pl-7 pr-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-800 font-semibold text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                        </div>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500">Isi persentase dari OTR atau langsung ketik nominal Rupiah.</p>
+                                </div>
+
+                                <!-- Asuransi Aset -->
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <label class="text-slate-600 font-medium">Asuransi Barang / Aset (<span id="rate-aset-label">6,255%</span>)</label>
+                                    </div>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-semibold">Rp</span>
+                                        <input type="text" id="input-asuransi-aset" value="470.376" oninput="handleDecimalCurrencyInput(this); calculateInstallment();" class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-800 font-semibold text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                </div>
+
+                                <!-- Asuransi Jiwa -->
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <label class="text-slate-600 font-medium">Asuransi Jiwa (<span id="rate-jiwa-label">7,5%</span>)</label>
+                                    </div>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-semibold">Rp</span>
+                                        <input type="text" id="input-asuransi-jiwa" value="564.000" oninput="handleDecimalCurrencyInput(this); calculateInstallment();" class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-800 font-semibold text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                </div>
+
+                                <!-- Biaya Provisi / Survei / Lainnya -->
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <label class="text-slate-600 font-medium" id="label-biaya-lain">Biaya Survei / Provisi / Kapitalisasi Lain</label>
+                                    </div>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-semibold">Rp</span>
+                                        <input type="text" id="input-biaya-lain" value="349.500" oninput="handleDecimalCurrencyInput(this); calculateInstallment();" class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg text-slate-800 font-semibold text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info Suku Bunga -->
+                        <div class="space-y-3 pt-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Skema Suku Bunga Flat</span>
+                                <span id="rate-mode-badge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Standar 1,99%/bln</span>
+                            </div>
+
+                            <!-- Pilihan Preset Bunga Bulanan & Referensi Kontrak Lama -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5" id="rate-preset-buttons">
+                                <button type="button" onclick="selectMonthlyRatePreset(0.99)" data-monthly="0.99" class="rate-preset-btn py-2 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition flex flex-col items-center">
+                                    <span>0,99% / bln</span>
+                                    <span class="text-[10px] font-normal opacity-80">11,88%/thn</span>
+                                </button>
+                                <button type="button" onclick="selectMonthlyRatePreset(1.99)" data-monthly="1.99" class="rate-preset-btn py-2 px-2 rounded-xl text-xs font-bold border border-blue-600 bg-blue-600 text-white shadow-sm transition flex flex-col items-center">
+                                    <span>1,99% / bln</span>
+                                    <span class="text-[10px] font-normal opacity-90">23,88%/thn</span>
+                                </button>
+                                <button type="button" onclick="selectMonthlyRatePreset(2.49)" data-monthly="2.49" class="rate-preset-btn py-2 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition flex flex-col items-center">
+                                    <span>2,49% / bln</span>
+                                    <span class="text-[10px] font-normal opacity-80">29,88%/thn</span>
+                                </button>
+                                <button type="button" id="btn-old-rate" onclick="applyOldCategoryRate()" data-monthly="old" class="rate-preset-btn py-2 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition flex flex-col items-center">
+                                    <span>Kontrak Lama</span>
+                                    <span id="old-rate-sublabel" class="text-[10px] font-normal opacity-80">56,42%/thn</span>
+                                </button>
+                            </div>
+
+                            <!-- Input Manual Tersinkronisasi (Bulanan & Tahunan) + Est. Effective Rate -->
+                            <div class="grid grid-cols-3 gap-2.5">
+                                <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-2.5">
+                                    <div class="text-[10px] font-semibold text-slate-500">Manual / Bulan</div>
+                                    <div class="flex items-center mt-0.5">
+                                        <input type="number" step="0.01" id="input-monthly-rate" value="1.99" oninput="handleManualMonthlyInput()" class="w-full bg-transparent font-bold text-blue-700 text-sm sm:text-base outline-none border-b border-blue-300 focus:border-blue-600">
+                                        <span class="font-bold text-blue-700 text-xs ml-0.5">%</span>
+                                    </div>
+                                    <div class="text-[10px] text-blue-600 mt-1">Flat / bln</div>
+                                </div>
+                                <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-2.5">
+                                    <div class="text-[10px] font-semibold text-slate-500">Manual / Tahun</div>
+                                    <div class="flex items-center mt-0.5">
+                                        <input type="number" step="0.01" id="input-flat-rate" value="23.88" oninput="handleManualAnnualInput()" class="w-full bg-transparent font-bold text-blue-700 text-sm sm:text-base outline-none border-b border-blue-300 focus:border-blue-600">
+                                        <span class="font-bold text-blue-700 text-xs ml-0.5">%</span>
+                                    </div>
+                                    <div class="text-[10px] text-blue-600 mt-1">Flat / thn</div>
+                                </div>
+                                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5">
+                                    <div class="text-[10px] font-semibold text-slate-500">Est. Effective</div>
+                                    <div id="display-effective-rate" class="font-bold text-slate-800 text-sm sm:text-base mt-0.5">42,41%</div>
+                                    <div class="text-[10px] text-slate-500 mt-1">Anuitas / thn</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KOLOM KANAN: Hasil Simulasi & Tabel Amortisasi (7 Kolom) -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Kartu Utama Hasil Cicilan -->
+                <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 rounded-2xl p-6 sm:p-8 text-white shadow-lg print-shadow-none">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+                        <div>
+                            <div class="inline-flex flex-wrap items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full text-xs font-medium text-blue-200 mb-3">
+                                <span id="badge-result-category">Kategori: Elektronik</span>
+                                <span>•</span>
+                                <span id="badge-result-tenor">Tenor 9 Bulan</span>
+                                <span>•</span>
+                                <span id="badge-result-rate" class="text-emerald-300 font-semibold">1,99%/bln (23,88% p.a)</span>
+                            </div>
+                            <p class="text-slate-300 text-sm font-medium">Estimasi Angsuran per Bulan</p>
+                            <div class="flex items-baseline gap-2 mt-1">
+                                <h2 id="res-installment" class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">Rp 1.068.000</h2>
+                                <span class="text-slate-400 text-sm">/ bulan</span>
+                            </div>
+                            <p id="res-installment-exact" class="text-xs text-slate-400 mt-1.5">Angka eksak sebelum pembulatan: Rp 1.067.966,64</p>
+                            <div id="savings-banner" class="mt-2.5 inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-medium px-3 py-1 rounded-lg">
+                                <i data-lucide="trending-down" class="w-3.5 h-3.5"></i>
+                                <span id="savings-text">Hemat Rp 221.000/bln dibanding bunga lama (56,42%)</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 sm:text-right min-w-[205px]">
+                            <p class="text-xs text-slate-300">Total Pokok Pembiayaan (NTF)</p>
+                            <p id="res-ntf" class="text-xl font-bold text-emerald-400 mt-0.5">Rp 8.151.725,60</p>
+                            <p id="res-admin-summary" class="text-[11px] text-slate-300 mt-1">Admin: <span class="text-emerald-300 font-semibold">Free (Rp 0)</span></p>
+                            <p id="res-tdp-summary" class="text-[11px] text-amber-300 mt-0.5 hidden">Total Bayar Awal (TDP): <span class="font-bold">Rp 0</span></p>
+                        </div>
+                    </div>
+
+                    <!-- 3 Metrik Ringkasan Bawah -->
+                    <div class="grid grid-cols-3 gap-4 pt-6">
+                        <div>
+                            <p class="text-xs text-slate-400">Pokok Barang (OTR - DP)</p>
+                            <p id="res-net-otr" class="text-sm sm:text-base font-bold text-white mt-0.5">Rp 7.520.000</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Total Bunga (<span id="res-tenor-sub">9</span> Bln)</p>
+                            <p id="res-total-interest" class="text-sm sm:text-base font-bold text-amber-300 mt-0.5">Rp 1.460.274,40</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400">Total Pengembalian</p>
+                            <p id="res-total-payment" class="text-sm sm:text-base font-bold text-white mt-0.5">Rp 9.612.000</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kartu Rincian Struktur Pembiayaan (Breakdown NTF) -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 print-shadow-none">
+                    <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-blue-600"></i>
+                        <span>Rincian Struktur Pembiayaan (Financial Data)</span>
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5 text-sm">
+                        <div class="flex justify-between py-1.5 border-b border-slate-100">
+                            <span class="text-slate-500">Harga Barang (Total OTR)</span>
+                            <span id="brk-otr" class="font-semibold text-slate-800">Rp 7.520.000</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-100">
+                            <span class="text-slate-500">Uang Muka (DP)</span>
+                            <span id="brk-dp" class="font-semibold text-slate-800">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-100">
+                            <span class="text-slate-500">Pokok Hutang Murni</span>
+                            <span id="brk-net-otr" class="font-semibold text-slate-800">Rp 7.520.000</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-100">
+                            <span id="brk-admin-label" class="text-slate-500">Biaya Admin (Free Admin)</span>
+                            <span id="brk-admin-value" class="font-bold text-emerald-600">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-100">
+                            <span id="brk-admin-lain-label" class="text-slate-500">Admin Lain-lain (As Loan)</span>
+                            <span id="brk-admin-lain-value" class="font-semibold text-slate-800">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-100">
+                            <span class="text-slate-500">Asuransi Aset (Capitalized)</span>
+                            <span id="brk-asuransi-aset" class="font-semibold text-slate-800">Rp 282.225,60</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-100">
+                            <span class="text-slate-500">Asuransi Jiwa (Capitalized)</span>
+                            <span id="brk-asuransi-jiwa" class="font-semibold text-slate-800">Rp 0,00</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-100">
+                            <span class="text-slate-500">Biaya Survei / Provisi / Lainnya</span>
+                            <span id="brk-biaya-lain" class="font-semibold text-slate-800">Rp 349.500,00</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-slate-100 sm:col-span-2">
+                            <span class="text-slate-500">Suku Bunga Pokok Tahunan</span>
+                            <span id="brk-flat-rate" class="font-semibold text-blue-700">23,88% / tahun (1,99%/bln)</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200 space-y-2 bg-slate-50 px-4 py-3 rounded-xl">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-slate-700 text-sm">Total Nilai Pembiayaan (NTF)</span>
+                            <span id="brk-total-ntf" class="font-extrabold text-blue-700 text-base">Rp 8.151.725,60</span>
+                        </div>
+                        <div id="brk-tdp-row" class="hidden flex justify-between items-center pt-2 border-t border-slate-200/80 text-xs">
+                            <span class="font-semibold text-amber-800">Total Bayar Awal / TDP (DP + Admin Awal)</span>
+                            <span id="brk-total-tdp" class="font-bold text-amber-700 text-sm">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Jadwal Angsuran (Agreement Card View) -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden print-shadow-none">
+                    <div class="px-6 py-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
+                                <i data-lucide="calendar-days" class="w-4 h-4 text-blue-600"></i>
+                                <span>Jadwal Angsuran (Agreement Card View)</span>
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Simulasi porsi pokok & bunga efektif anuitas bulanan</p>
+                        </div>
+                        <button onclick="toggleScheduleTable()" id="btn-toggle-table" class="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg transition no-print">
+                            Sembunyikan Tabel
+                        </button>
+                    </div>
+
+                    <div id="schedule-container" class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/80 text-slate-600 text-[11px] font-bold uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-3 px-4 text-center">No</th>
+                                    <th class="py-3 px-4">Jatuh Tempo</th>
+                                    <th class="py-3 px-4 text-right">Angsuran</th>
+                                    <th class="py-3 px-4 text-right">Pokok (Principal)</th>
+                                    <th class="py-3 px-4 text-right">Bunga (Interest)</th>
+                                    <th class="py-3 px-4 text-right">Sisa Pokok (O/S)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedule-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
+                                <!-- Diisi dinamis oleh JS -->
+                            </tbody>
+                            <tfoot id="schedule-foot" class="bg-slate-50 font-bold text-slate-800 text-xs sm:text-sm border-t-2 border-slate-200">
+                                <!-- Diisi dinamis oleh JS -->
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-12 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+            <p>Simulasi Pembiayaan Konsumen • Skema Promo <strong>NWG Admin As Loan</strong></p>
+            <p>Catatan: Angka aktual dapat menyesuaikan kebijakan pembulatan sistem & tanggal realisasi kontrak.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Inisialisasi Lucide Icons
+        lucide.createIcons();
+
+        // Standar Suku Bunga Pokok Tahunan Default
+        const STANDARD_ANNUAL_RATE = 23.88;
+
+        // Konfigurasi Database & Parameter per Kategori
+        const DB_CONFIG = {
+            elektronik: {
+                name: 'Elektronik',
+                flatRate: STANDARD_ANNUAL_RATE,
+                oldContractRate: 56.42,
+                asetInsuranceRatio: 0.06255, // 6,255% dari OTR
+                lifeInsuranceRatio: 0.075,   // 7,5% dari OTR
+                defaultOtherFeeRatio: 0.0,
+                presets: [
+                    {
+                        id: 'warsini',
+                        label: 'Kontrak Warsini (OTR 7,52 Jt • 9 Bln)',
+                        otr: 7520000,
+                        dp: 0,
+                        tenor: 9,
+                        asuransiAset: 470376,
+                        asuransiJiwa: 564000,
+                        biayaLain: 349500,
+                        flatRate: STANDARD_ANNUAL_RATE,
+                        oldRate: 56.42
+                    },
+                    {
+                        id: 'elektronik2',
+                        label: 'Simulasi Elektronik 2 (OTR 3,45 Jt • 9 Bln)',
+                        otr: 3450000,
+                        dp: 0,
+                        tenor: 9,
+                        asuransiAset: 215797.50,
+                        asuransiJiwa: 258750,
+                        biayaLain: 11000,
+                        flatRate: STANDARD_ANNUAL_RATE,
+                        oldRate: 56.42
+                    }
+                ]
+            },
+            gadget: {
+                name: 'Gadget',
+                flatRate: STANDARD_ANNUAL_RATE,
+                oldContractRate: 56.44,
+                asetInsuranceRatio: 0.06255, // 6,255% dari OTR
+                lifeInsuranceRatio: 0.075,   // 7,5% dari OTR
+                defaultOtherFeeRatio: 0.0780, // ~7.80% dari OTR (Provisi)
+                presets: [
+                    {
+                        id: 'ernawati',
+                        label: 'Kontrak Ernawati Sari (OTR 2,399 Jt • 12 Bln)',
+                        otr: 2399000,
+                        dp: 0,
+                        tenor: 12,
+                        asuransiAset: 150057.45,
+                        asuransiJiwa: 179925,
+                        biayaLain: 198122,
+                        flatRate: STANDARD_ANNUAL_RATE,
+                        oldRate: 56.44
+                    }
+                ]
+            }
+        };
+
+        let currentCategory = 'elektronik';
+        let currentTenor = 9;
+        let currentAdminMode = 'free'; // 'free' | 'as_loan' | 'upfront'
+        let isScheduleVisible = true;
+
+        // Format Angka ke Rupiah
+        function formatRupiah(num, decimals = 0) {
+            if (isNaN(num)) num = 0;
+            return 'Rp ' + num.toLocaleString('id-ID', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        // Format Angka Biasa (untuk input)
+        function formatNumberInput(num, maxDecimals = 2) {
+            if (isNaN(num) || num === 0) return '0';
+            return num.toLocaleString('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: maxDecimals
+            });
+        }
+
+        // Parse string input format Indonesia (1.234.567,89) ke Float
+        function parseIndoNumber(str) {
+            if (!str) return 0;
+            const cleaned = str.toString().replace(/\./g, '').replace(',', '.');
+            const val = parseFloat(cleaned);
+            return isNaN(val) ? 0 : val;
+        }
+
+        // Handler input bilangan bulat (OTR & DP)
+        function handleCurrencyInput(el) {
+            let raw = el.value.replace(/[^0-9]/g, '');
+            if (!raw) {
+                el.value = '0';
+                return;
+            }
+            el.value = parseInt(raw, 10).toLocaleString('id-ID');
+        }
+
+        // Handler input bilangan desimal (Asuransi & Biaya)
+        function handleDecimalCurrencyInput(el) {
+            let val = el.value.replace(/[^0-9,]/g, '');
+            const parts = val.split(',');
+            if (parts.length > 2) {
+                val = parts[0] + ',' + parts.slice(1).join('');
+            }
+            if (parts[0]) {
+                parts[0] = parseInt(parts[0], 10).toLocaleString('id-ID');
+            } else {
+                parts[0] = '0';
+            }
+            el.value = parts.length > 1 ? parts[0] + ',' + parts[1].slice(0, 2) : parts[0];
+        }
+
+        // Ganti Kategori (Elektronik vs Gadget)
+        function switchCategory(cat) {
+            currentCategory = cat;
+            const tabElek = document.getElementById('tab-elektronik');
+            const tabGad = document.getElementById('tab-gadget');
+            const catPill = document.getElementById('category-pill');
+            const oldRateSublabel = document.getElementById('old-rate-sublabel');
+
+            if (cat === 'elektronik') {
+                tabElek.className = 'flex-1 flex items-center justify-between px-5 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-blue-600 text-white shadow-sm';
+                tabGad.className = 'flex-1 flex items-center justify-between px-5 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50';
+                catPill.textContent = 'ELEKTRONIK';
+                catPill.className = 'text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-blue-100 text-blue-700';
+                document.getElementById('rate-aset-label').textContent = '6,255%';
+                document.getElementById('rate-jiwa-label').textContent = '7,5%';
+                oldRateSublabel.textContent = '56,42%/thn';
+            } else {
+                tabGad.className = 'flex-1 flex items-center justify-between px-5 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-indigo-600 text-white shadow-sm';
+                tabElek.className = 'flex-1 flex items-center justify-between px-5 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 text-slate-600 hover:bg-slate-50';
+                catPill.textContent = 'GADGET';
+                catPill.className = 'text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-700';
+                document.getElementById('rate-aset-label').textContent = '6,255%';
+                document.getElementById('rate-jiwa-label').textContent = '7,5%';
+                oldRateSublabel.textContent = '56,44%/thn';
+            }
+
+            renderPresets();
+            // Muat preset pertama dari kategori yang dipilih agar langsung akurat
+            loadPreset(DB_CONFIG[cat].presets[0].id);
+        }
+
+        // Pilih Skema Biaya Admin ('free', 'as_loan', 'upfront')
+        function selectAdminMode(mode, silent = false) {
+            currentAdminMode = mode;
+            const inputWrapper = document.getElementById('admin-fee-input-wrapper');
+            const badge = document.getElementById('admin-scheme-badge');
+            const hint = document.getElementById('admin-mode-hint');
+            const headerLabel = document.getElementById('header-promo-label');
+            const adminInput = document.getElementById('input-biaya-admin');
+
+            document.querySelectorAll('.admin-mode-btn').forEach(btn => {
+                if (btn.getAttribute('data-admin-mode') === mode) {
+                    btn.className = 'admin-mode-btn py-1.5 px-2 rounded-lg text-[11px] font-bold border border-blue-600 bg-blue-600 text-white shadow-sm transition';
+                } else {
+                    btn.className = 'admin-mode-btn py-1.5 px-2 rounded-lg text-[11px] font-bold border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition';
+                }
+            });
+
+            if (mode === 'free') {
+                inputWrapper.classList.add('hidden');
+                adminInput.value = '0';
+                document.getElementById('input-biaya-admin-pct').value = '0';
+                badge.textContent = 'FREE ADMIN';
+                badge.className = 'text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded';
+                headerLabel.textContent = 'FREE ADMIN (Admin Rp 0)';
+                headerLabel.className = 'text-emerald-400 font-semibold';
+                if (!silent) showToast('Skema Free Admin aktif (Biaya Admin Rp 0)');
+            } else if (mode === 'as_loan') {
+                inputWrapper.classList.remove('hidden');
+                if (parseIndoNumber(adminInput.value) === 0) {
+                    setQuickAdminPercent(2);
+                }
+                badge.textContent = 'ADMIN AS LOAN';
+                badge.className = 'text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded';
+                hint.textContent = 'Dikapitalisasi ke pokok NTF';
+                hint.className = 'text-[10px] font-semibold text-blue-600';
+                headerLabel.textContent = 'ADMIN AS LOAN (Masuk NTF)';
+                headerLabel.className = 'text-blue-300 font-semibold';
+                if (!silent) showToast('Admin As Loan aktif (Biaya admin masuk ke cicilan/NTF)');
+            } else if (mode === 'upfront') {
+                inputWrapper.classList.remove('hidden');
+                if (parseIndoNumber(adminInput.value) === 0) {
+                    setQuickAdminPercent(2);
+                }
+                badge.textContent = 'BAYAR AWAL (TDP)';
+                badge.className = 'text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded';
+                hint.textContent = 'Dibayar tunai bersama DP';
+                hint.className = 'text-[10px] font-semibold text-amber-700';
+                headerLabel.textContent = 'ADMIN BAYAR DI AWAL (TDP)';
+                headerLabel.className = 'text-amber-300 font-semibold';
+                if (!silent) showToast('Admin Bayar di Awal aktif (Tidak menambah pokok NTF)');
+            }
+
+            calculateInstallment();
+        }
+
+        // Isi Cepat Persentase Biaya Admin (% dari OTR)
+        function setQuickAdminPercent(pct) {
+            document.getElementById('input-biaya-admin-pct').value = pct;
+            handleAdminPercentInput();
+            calculateInstallment();
+        }
+
+        // Isi Cepat Nominal Biaya Admin
+        function setQuickAdminFee(amount) {
+            document.getElementById('input-biaya-admin').value = formatNumberInput(amount, 0);
+            syncAdminPercentFromNominal();
+            calculateInstallment();
+        }
+
+        // Sinkronisasi Biaya Admin: dari % ke Rp
+        function handleAdminPercentInput() {
+            const otr = parseIndoNumber(document.getElementById('input-otr').value);
+            const pct = parseFloat(document.getElementById('input-biaya-admin-pct').value) || 0;
+            const nominal = Math.round((otr * pct) / 100);
+            document.getElementById('input-biaya-admin').value = formatNumberInput(nominal, 0);
+        }
+
+        function syncAdminFromPercent() {
+            if (currentAdminMode === 'free') return;
+            const pct = parseFloat(document.getElementById('input-biaya-admin-pct').value) || 0;
+            if (pct > 0) handleAdminPercentInput();
+        }
+
+        // Sinkronisasi Biaya Admin: dari Rp ke %
+        function syncAdminPercentFromNominal() {
+            const otr = parseIndoNumber(document.getElementById('input-otr').value);
+            const nominal = parseIndoNumber(document.getElementById('input-biaya-admin').value);
+            const pct = otr > 0 ? parseFloat(((nominal / otr) * 100).toFixed(2)) : 0;
+            document.getElementById('input-biaya-admin-pct').value = pct;
+        }
+
+        // Sinkronisasi Admin Lain-lain: dari % ke Rp
+        function handleAdminLainPercentInput() {
+            const otr = parseIndoNumber(document.getElementById('input-otr').value);
+            const pct = parseFloat(document.getElementById('input-admin-lain-pct').value) || 0;
+            const nominal = Math.round((otr * pct) / 100);
+            document.getElementById('input-admin-lain').value = formatNumberInput(nominal, 0);
+        }
+
+        function syncAdminLainFromPercent() {
+            const pct = parseFloat(document.getElementById('input-admin-lain-pct').value) || 0;
+            if (pct > 0) handleAdminLainPercentInput();
+        }
+
+        // Sinkronisasi Admin Lain-lain: dari Rp ke %
+        function syncAdminLainPercentFromNominal() {
+            const otr = parseIndoNumber(document.getElementById('input-otr').value);
+            const nominal = parseIndoNumber(document.getElementById('input-admin-lain').value);
+            const pct = otr > 0 ? parseFloat(((nominal / otr) * 100).toFixed(2)) : 0;
+            document.getElementById('input-admin-lain-pct').value = pct;
+        }
+
+        // Pilih Preset Bunga Bulanan (0.99%, 1.99%, 2.49%)
+        function selectMonthlyRatePreset(monthlyRate) {
+            const annualRate = parseFloat((monthlyRate * 12).toFixed(2));
+            document.getElementById('input-monthly-rate').value = monthlyRate.toFixed(2);
+            document.getElementById('input-flat-rate').value = annualRate.toFixed(2);
+            updateRatePresetUI(annualRate);
+            calculateInstallment();
+            showToast(`Skema bunga dipilih: ${monthlyRate.toFixed(2).replace('.', ',')}% / bln (${annualRate.toFixed(2).replace('.', ',')}% / thn)`);
+        }
+
+        // Terapkan Bunga Kontrak Lama sesuai kategori
+        function applyOldCategoryRate() {
+            const oldAnnualRate = DB_CONFIG[currentCategory].oldContractRate;
+            const oldMonthlyRate = parseFloat((oldAnnualRate / 12).toFixed(4));
+            document.getElementById('input-flat-rate').value = oldAnnualRate.toFixed(2);
+            document.getElementById('input-monthly-rate').value = oldMonthlyRate.toFixed(2);
+            updateRatePresetUI(oldAnnualRate);
+            calculateInstallment();
+            showToast(`Bunga kontrak lama diterapkan: ${oldAnnualRate.toFixed(2).replace('.', ',')}% / thn`);
+        }
+
+        // Sinkronisasi saat pengguna mengetik bunga manual bulanan
+        function handleManualMonthlyInput() {
+            const monthlyVal = parseFloat(document.getElementById('input-monthly-rate').value);
+            const annualVal = isNaN(monthlyVal) ? 0 : parseFloat((monthlyVal * 12).toFixed(2));
+            document.getElementById('input-flat-rate').value = annualVal;
+            updateRatePresetUI(annualVal);
+            calculateInstallment();
+        }
+
+        // Sinkronisasi saat pengguna mengetik bunga manual tahunan
+        function handleManualAnnualInput() {
+            const annualVal = parseFloat(document.getElementById('input-flat-rate').value);
+            const monthlyVal = isNaN(annualVal) ? 0 : parseFloat((annualVal / 12).toFixed(2));
+            document.getElementById('input-monthly-rate').value = monthlyVal;
+            updateRatePresetUI(annualVal);
+            calculateInstallment();
+        }
+
+        // Perbarui tampilan tombol preset & badge status (Preset vs Manual / Kustom)
+        function updateRatePresetUI(annualRate) {
+            const oldRate = DB_CONFIG[currentCategory].oldContractRate;
+            const monthlyRate = annualRate / 12;
+            const badge = document.getElementById('rate-mode-badge');
+
+            let activePreset = null;
+            if (Math.abs(monthlyRate - 0.99) < 0.005) activePreset = '0.99';
+            else if (Math.abs(monthlyRate - 1.99) < 0.005) activePreset = '1.99';
+            else if (Math.abs(monthlyRate - 2.49) < 0.005) activePreset = '2.49';
+            else if (Math.abs(annualRate - oldRate) < 0.01) activePreset = 'old';
+
+            document.querySelectorAll('.rate-preset-btn').forEach(btn => {
+                const key = btn.getAttribute('data-monthly');
+                if (key === activePreset) {
+                    btn.className = 'rate-preset-btn py-2 px-2 rounded-xl text-xs font-bold border border-blue-600 bg-blue-600 text-white shadow-sm transition flex flex-col items-center';
+                } else {
+                    btn.className = 'rate-preset-btn py-2 px-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition flex flex-col items-center';
+                }
+            });
+
+            if (activePreset === '0.99') {
+                badge.textContent = 'Promo 0,99%/bln';
+                badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700';
+            } else if (activePreset === '1.99') {
+                badge.textContent = 'Standar 1,99%/bln';
+                badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700';
+            } else if (activePreset === '2.49') {
+                badge.textContent = 'Skema 2,49%/bln';
+                badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700';
+            } else if (activePreset === 'old') {
+                badge.textContent = 'Kontrak Lama';
+                badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800';
+            } else {
+                badge.textContent = 'Manual / Kustom';
+                badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700';
+            }
+        }
+
+        // Render Tombol Preset
+        function renderPresets() {
+            const container = document.getElementById('preset-buttons');
+            const presets = DB_CONFIG[currentCategory].presets;
+            container.innerHTML = presets.map(p => `
+                <button onclick="loadPreset('${p.id}')" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-blue-200 bg-blue-50/60 hover:bg-blue-100 text-blue-700 transition flex items-center gap-1.5">
+                    <i data-lucide="file-check-2" class="w-3.5 h-3.5"></i>
+                    <span>${p.label}</span>
+                </button>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Muat Data Preset ke Form
+        function loadPreset(presetId) {
+            const preset = DB_CONFIG[currentCategory].presets.find(p => p.id === presetId);
+            if (!preset) return;
+
+            document.getElementById('input-otr').value = formatNumberInput(preset.otr, 0);
+            document.getElementById('input-dp').value = formatNumberInput(preset.dp, 0);
+            document.getElementById('input-asuransi-aset').value = formatNumberInput(preset.asuransiAset, 2);
+            document.getElementById('input-asuransi-jiwa').value = formatNumberInput(preset.asuransiJiwa, 2);
+            document.getElementById('input-biaya-lain').value = formatNumberInput(preset.biayaLain, 2);
+            document.getElementById('input-admin-lain').value = '0';
+            document.getElementById('input-admin-lain-pct').value = '0';
+            document.getElementById('select-admin-lain-mode').value = 'as_loan';
+            document.getElementById('input-flat-rate').value = preset.flatRate.toFixed(2);
+            document.getElementById('input-monthly-rate').value = (preset.flatRate / 12).toFixed(2);
+            updateRatePresetUI(preset.flatRate);
+            selectAdminMode('free', true);
+
+            selectTenor(preset.tenor, false);
+            calculateInstallment();
+            showToast(`Data "${preset.label}" dimuat`);
+        }
+
+        // Hitung Otomatis Biaya Kapitalisasi Berdasarkan Rasio Database
+        function autoCalculateFees(showNotif = false) {
+            const cfg = DB_CONFIG[currentCategory];
+            const otr = parseIndoNumber(document.getElementById('input-otr').value);
+
+            const asuransiAset = Math.round(otr * cfg.asetInsuranceRatio * 100) / 100;
+            const asuransiJiwa = Math.round(otr * cfg.lifeInsuranceRatio * 100) / 100;
+            const biayaLain = Math.round(otr * cfg.defaultOtherFeeRatio);
+
+            document.getElementById('input-asuransi-aset').value = formatNumberInput(asuransiAset, 2);
+            document.getElementById('input-asuransi-jiwa').value = formatNumberInput(asuransiJiwa, 2);
+            document.getElementById('input-biaya-lain').value = formatNumberInput(biayaLain, 2);
+            document.getElementById('input-admin-lain').value = '0';
+            document.getElementById('input-admin-lain-pct').value = '0';
+
+            if (showNotif) {
+                showToast('Biaya kapitalisasi & admin lain-lain direset');
+            }
+        }
+
+        // Set DP berdasarkan persentase
+        function setDpPercent(pct) {
+            const otr = parseIndoNumber(document.getElementById('input-otr').value);
+            const dp = Math.round((otr * pct) / 100);
+            document.getElementById('input-dp').value = formatNumberInput(dp, 0);
+            calculateInstallment();
+        }
+
+        // Pilih Tenor
+        function selectTenor(tenor, recalc = true) {
+            currentTenor = tenor;
+            document.querySelectorAll('.tenor-btn').forEach(btn => {
+                const t = parseInt(btn.getAttribute('data-tenor'), 10);
+                if (t === tenor) {
+                    btn.className = 'tenor-btn py-2.5 rounded-xl text-sm font-bold border border-blue-600 bg-blue-600 text-white shadow-sm transition';
+                } else {
+                    btn.className = 'tenor-btn py-2.5 rounded-xl text-sm font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition';
+                }
+            });
+            if (recalc) calculateInstallment();
+        }
+
+        // Fungsi Utama Perhitungan Angsuran & Amortisasi
+        function calculateInstallment() {
+            const otr = parseIndoNumber(document.getElementById('input-otr').value);
+            let dp = parseIndoNumber(document.getElementById('input-dp').value);
+            if (dp > otr) {
+                dp = otr;
+                document.getElementById('input-dp').value = formatNumberInput(dp, 0);
+            }
+
+            const dpPct = otr > 0 ? ((dp / otr) * 100).toFixed(1).replace('.0', '') : 0;
+            document.getElementById('dp-percent-label').textContent = `${dpPct}% dari OTR`;
+
+            const asuransiAset = parseIndoNumber(document.getElementById('input-asuransi-aset').value);
+            const asuransiJiwa = parseIndoNumber(document.getElementById('input-asuransi-jiwa').value);
+            const biayaLain = parseIndoNumber(document.getElementById('input-biaya-lain').value);
+            const rawBiayaAdmin = currentAdminMode === 'free' ? 0 : parseIndoNumber(document.getElementById('input-biaya-admin').value);
+            const adminAsLoan = currentAdminMode === 'as_loan' ? rawBiayaAdmin : 0;
+            const adminUpfront = currentAdminMode === 'upfront' ? rawBiayaAdmin : 0;
+
+            const rawAdminLain = parseIndoNumber(document.getElementById('input-admin-lain').value);
+            const adminLainMode = document.getElementById('select-admin-lain-mode').value;
+            const adminLainAsLoan = adminLainMode === 'as_loan' ? rawAdminLain : 0;
+            const adminLainUpfront = adminLainMode === 'upfront' ? rawAdminLain : 0;
+
+            const totalTdp = dp + adminUpfront + adminLainUpfront;
+
+            const flatRate = parseFloat(document.getElementById('input-flat-rate').value) || 0;
+            const monthlyFlatRate = flatRate / 12;
+
+            const netOtr = Math.max(0, otr - dp);
+            // Pokok Pembiayaan (NTF) = Pokok Barang + Asuransi + Biaya Kapitalisasi + Admin As Loan + Admin Lain-lain (As Loan)
+            const ntf = netOtr + asuransiAset + asuransiJiwa + biayaLain + adminAsLoan + adminLainAsLoan;
+
+            // Total Bunga Flat (Rumus: NTF * (Bunga Tahunan / 100) * (Tenor / 12))
+            const totalInterestFlat = ntf * (flatRate / 100) * (currentTenor / 12);
+            const totalPaymentExact = ntf + totalInterestFlat;
+            const installmentExact = currentTenor > 0 ? totalPaymentExact / currentTenor : 0;
+
+            // Pembulatan standar multifinance ke ribuan terdekat
+            const installmentRounded = Math.round(installmentExact / 1000) * 1000;
+            const totalPaymentRounded = installmentRounded * currentTenor;
+            const totalInterestAdjusted = Math.max(0, totalPaymentRounded - ntf);
+
+            // Hitung Estimasi Effective Rate (IRR / Anuitas)
+            const effRate = estimateEffectiveRate(ntf, installmentRounded, currentTenor);
+
+            // Hitung Perbandingan dengan Bunga Kontrak Lama
+            const oldRate = DB_CONFIG[currentCategory].oldContractRate;
+            const oldTotalInterest = ntf * (oldRate / 100) * (currentTenor / 12);
+            const oldInstallmentRounded = currentTenor > 0 ? Math.round(((ntf + oldTotalInterest) / currentTenor) / 1000) * 1000 : 0;
+            const monthlySavings = oldInstallmentRounded - installmentRounded;
+
+            const savingsBanner = document.getElementById('savings-banner');
+            const savingsText = document.getElementById('savings-text');
+            if (monthlySavings > 0 && ntf > 0) {
+                savingsBanner.classList.remove('hidden');
+                savingsText.textContent = `Hemat ${formatRupiah(monthlySavings, 0)}/bln dibanding bunga lama (${oldRate.toFixed(2).replace('.', ',')}%)`;
+            } else {
+                savingsBanner.classList.add('hidden');
+            }
+
+            // Update UI Kartu Hasil
+            document.getElementById('badge-result-category').textContent = `Kategori: ${DB_CONFIG[currentCategory].name}`;
+            document.getElementById('badge-result-tenor').textContent = `Tenor ${currentTenor} Bulan`;
+            document.getElementById('badge-result-rate').textContent = `${monthlyFlatRate.toFixed(2).replace('.', ',')}%/bln (${flatRate.toFixed(2).replace('.', ',')}% p.a)`;
+            document.getElementById('res-tenor-sub').textContent = currentTenor;
+
+            document.getElementById('res-installment').textContent = formatRupiah(installmentRounded, 0);
+            document.getElementById('res-installment-exact').textContent = `Angka eksak sebelum pembulatan: ${formatRupiah(installmentExact, 2)}`;
+            document.getElementById('res-ntf').textContent = formatRupiah(ntf, 2);
+            document.getElementById('res-net-otr').textContent = formatRupiah(netOtr, 0);
+            document.getElementById('res-total-interest').textContent = formatRupiah(totalInterestAdjusted, 2);
+            document.getElementById('res-total-payment').textContent = formatRupiah(totalPaymentRounded, 0);
+            document.getElementById('display-effective-rate').textContent = effRate.toFixed(2).replace('.', ',') + '%';
+
+            // Update Ringkasan Admin & TDP di Kartu Utama
+            const resAdminSummary = document.getElementById('res-admin-summary');
+            const resTdpSummary = document.getElementById('res-tdp-summary');
+            if (currentAdminMode === 'free') {
+                resAdminSummary.innerHTML = `Admin: <span class="text-emerald-300 font-semibold">Free (Rp 0)</span>`;
+            } else if (currentAdminMode === 'as_loan') {
+                resAdminSummary.innerHTML = `Admin As Loan: <span class="text-blue-200 font-semibold">${formatRupiah(adminAsLoan, 0)} (NTF)</span>`;
+            } else {
+                resAdminSummary.innerHTML = `Admin Awal: <span class="text-amber-300 font-semibold">${formatRupiah(adminUpfront, 0)} (TDP)</span>`;
+            }
+
+            if (totalTdp > 0) {
+                resTdpSummary.classList.remove('hidden');
+                resTdpSummary.innerHTML = `Total Bayar Awal (TDP): <span class="font-bold">${formatRupiah(totalTdp, 0)}</span>`;
+            } else {
+                resTdpSummary.classList.add('hidden');
+            }
+
+            // Update Breakdown NTF
+            document.getElementById('brk-otr').textContent = formatRupiah(otr, 0);
+            document.getElementById('brk-dp').textContent = formatRupiah(dp, 0);
+            document.getElementById('brk-net-otr').textContent = formatRupiah(netOtr, 0);
+
+            const brkAdminLabel = document.getElementById('brk-admin-label');
+            const brkAdminValue = document.getElementById('brk-admin-value');
+            if (currentAdminMode === 'free') {
+                brkAdminLabel.textContent = 'Biaya Admin (Free Admin)';
+                brkAdminValue.textContent = 'Rp 0';
+                brkAdminValue.className = 'font-bold text-emerald-600';
+            } else if (currentAdminMode === 'as_loan') {
+                brkAdminLabel.textContent = 'Biaya Admin (Admin As Loan)';
+                brkAdminValue.textContent = formatRupiah(adminAsLoan, 0);
+                brkAdminValue.className = 'font-bold text-blue-700';
+            } else {
+                brkAdminLabel.textContent = 'Biaya Admin (Bayar Awal / TDP)';
+                brkAdminValue.textContent = `${formatRupiah(adminUpfront, 0)} (Non-NTF)`;
+                brkAdminValue.className = 'font-bold text-amber-700';
+            }
+
+            document.getElementById('brk-asuransi-aset').textContent = formatRupiah(asuransiAset, 2);
+            document.getElementById('brk-asuransi-jiwa').textContent = formatRupiah(asuransiJiwa, 2);
+            document.getElementById('brk-biaya-lain').textContent = formatRupiah(biayaLain, 2);
+
+            const brkAdminLainLabel = document.getElementById('brk-admin-lain-label');
+            const brkAdminLainValue = document.getElementById('brk-admin-lain-value');
+            if (adminLainMode === 'as_loan') {
+                brkAdminLainLabel.textContent = 'Admin Lain-lain (As Loan)';
+                brkAdminLainValue.textContent = formatRupiah(rawAdminLain, 0);
+                brkAdminLainValue.className = rawAdminLain > 0 ? 'font-bold text-blue-700' : 'font-semibold text-slate-800';
+            } else {
+                brkAdminLainLabel.textContent = 'Admin Lain-lain (Bayar Awal / TDP)';
+                brkAdminLainValue.textContent = rawAdminLain > 0 ? `${formatRupiah(rawAdminLain, 0)} (Non-NTF)` : 'Rp 0';
+                brkAdminLainValue.className = rawAdminLain > 0 ? 'font-bold text-amber-700' : 'font-semibold text-slate-800';
+            }
+
+            document.getElementById('brk-flat-rate').textContent = `${flatRate.toFixed(2).replace('.', ',')}% / tahun (${monthlyFlatRate.toFixed(2).replace('.', ',')}%/bln)`;
+            document.getElementById('brk-total-ntf').textContent = formatRupiah(ntf, 2);
+
+            const brkTdpRow = document.getElementById('brk-tdp-row');
+            if (totalTdp > 0) {
+                brkTdpRow.classList.remove('hidden');
+                document.getElementById('brk-total-tdp').textContent = formatRupiah(totalTdp, 0);
+            } else {
+                brkTdpRow.classList.add('hidden');
+            }
+
+            // Generate Jadwal Amortisasi
+            generateAmortizationSchedule(ntf, installmentRounded, currentTenor, effRate);
+        }
+
+        // Metode Newton-Raphson untuk mencari Effective Rate tahunan dari NTF, Cicilan, Tenor
+        function estimateEffectiveRate(principal, pmt, n) {
+            if (principal <= 0 || pmt <= 0 || n <= 0 || pmt * n <= principal) return 0;
+            let r = 0.05; // tebakan awal bunga bulanan 5%
+            for (let i = 0; i < 50; i++) {
+                const factor = Math.pow(1 + r, -n);
+                const f = pmt * ((1 - factor) / r) - principal;
+                const df = pmt * ((n * Math.pow(1 + r, -n - 1) * r - (1 - factor)) / (r * r));
+                const nextR = r - f / df;
+                if (Math.abs(nextR - r) < 1e-9) {
+                    r = nextR;
+                    break;
+                }
+                r = nextR;
+            }
+            return r * 12 * 100;
+        }
+
+        // Generate Tabel Jadwal Angsuran Bulanan (Anuitas Efektif)
+        function generateAmortizationSchedule(ntf, installment, tenor, effRateAnnual) {
+            const tbody = document.getElementById('schedule-body');
+            const tfoot = document.getElementById('schedule-foot');
+            
+            if (ntf <= 0 || tenor <= 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">Masukkan harga barang untuk melihat jadwal angsuran</td></tr>';
+                tfoot.innerHTML = '';
+                return;
+            }
+
+            const monthlyRate = (effRateAnnual / 100) / 12;
+            let remainingPrincipal = ntf;
+            let totalPrincipalPaid = 0;
+            let totalInterestPaid = 0;
+            let totalInstallmentPaid = 0;
+
+            const today = new Date();
+            let rowsHtml = '';
+
+            for (let i = 1; i <= tenor; i++) {
+                // Tanggal jatuh tempo bulan ke-i
+                const dueDate = new Date(today.getFullYear(), today.getMonth() + i, today.getDate());
+                const dateStr = dueDate.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+                let interest = remainingPrincipal * monthlyRate;
+                let principal = installment - interest;
+
+                // Penyesuaian pada bulan terakhir agar sisa pokok tepat 0,00
+                if (i === tenor) {
+                    principal = remainingPrincipal;
+                    interest = Math.max(0, installment - principal);
+                }
+
+                remainingPrincipal = Math.max(0, remainingPrincipal - principal);
+
+                totalPrincipalPaid += principal;
+                totalInterestPaid += interest;
+                totalInstallmentPaid += installment;
+
+                rowsHtml += `
+                    <tr class="hover:bg-blue-50/40 transition">
+                        <td class="py-2.5 px-4 text-center font-semibold text-slate-600">${i}</td>
+                        <td class="py-2.5 px-4 text-slate-600">${dateStr}</td>
+                        <td class="py-2.5 px-4 text-right font-bold text-slate-800">${formatRupiah(installment, 0)}</td>
+                        <td class="py-2.5 px-4 text-right text-slate-700">${formatRupiah(principal, 2)}</td>
+                        <td class="py-2.5 px-4 text-right text-amber-700">${formatRupiah(interest, 2)}</td>
+                        <td class="py-2.5 px-4 text-right font-medium text-slate-600">${formatRupiah(remainingPrincipal, 2)}</td>
+                    </tr>
+                `;
+            }
+
+            tbody.innerHTML = rowsHtml;
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="2" class="py-3 px-4 text-right uppercase text-xs text-slate-500">Total Keseluruhan</td>
+                    <td class="py-3 px-4 text-right text-blue-700">${formatRupiah(totalInstallmentPaid, 0)}</td>
+                    <td class="py-3 px-4 text-right text-slate-800">${formatRupiah(totalPrincipalPaid, 2)}</td>
+                    <td class="py-3 px-4 text-right text-amber-700">${formatRupiah(totalInterestPaid, 2)}</td>
+                    <td class="py-3 px-4 text-right text-emerald-600">Rp 0,00</td>
+                </tr>
+            `;
+        }
+
+        // Toggle Tampilkan/Sembunyikan Tabel
+        function toggleScheduleTable() {
+            const container = document.getElementById('schedule-container');
+            const btn = document.getElementById('btn-toggle-table');
+            isScheduleVisible = !isScheduleVisible;
+            if (isScheduleVisible) {
+                container.classList.remove('hidden');
+                btn.textContent = 'Sembunyikan Tabel';
+            } else {
+                container.classList.add('hidden');
+                btn.textContent = 'Tampilkan Tabel';
+            }
+        }
+
+        // Salin Ringkasan Penawaran untuk WhatsApp
+        function copyWhatsAppSummary() {
+            const catName = DB_CONFIG[currentCategory].name;
+            const otr = document.getElementById('brk-otr').textContent;
+            const dp = document.getElementById('brk-dp').textContent;
+            const ntf = document.getElementById('res-ntf').textContent;
+            const installment = document.getElementById('res-installment').textContent;
+            const flatRate = parseFloat(document.getElementById('input-flat-rate').value) || 0;
+            const rawBiayaAdmin = currentAdminMode === 'free' ? 0 : parseIndoNumber(document.getElementById('input-biaya-admin').value);
+            const rawAdminLain = parseIndoNumber(document.getElementById('input-admin-lain').value);
+            const adminLainMode = document.getElementById('select-admin-lain-mode').value;
+
+            let promoHeader = 'FREE ADMIN (Admin Rp 0)';
+            let adminLine = '• Biaya Admin: Rp 0';
+            if (currentAdminMode === 'as_loan') {
+                promoHeader = 'ADMIN AS LOAN (Masuk Pokok NTF)';
+                adminLine = `• Biaya Admin (As Loan): ${formatRupiah(rawBiayaAdmin, 0)}`;
+            } else if (currentAdminMode === 'upfront') {
+                promoHeader = 'ADMIN BAYAR DI AWAL (TDP)';
+                adminLine = `• Biaya Admin (Bayar Awal): ${formatRupiah(rawBiayaAdmin, 0)}`;
+            }
+
+            let adminLainLine = '';
+            if (rawAdminLain > 0) {
+                const modeLabel = adminLainMode === 'as_loan' ? 'As Loan' : 'Bayar Awal';
+                adminLainLine = `• Admin Lain-lain (${modeLabel}): ${formatRupiah(rawAdminLain, 0)}\n`;
+            }
+
+            const text = `*SIMULASI KREDIT ${catName.toUpperCase()}*\n` +
+                         `Skema: *${promoHeader}*\n` +
+                         `----------------------------------\n` +
+                         `• Harga Barang (OTR): ${otr}\n` +
+                         `• Uang Muka (DP): ${dp}\n` +
+                         `${adminLine}\n` +
+                         `${adminLainLine}` +
+                         `• Total Pembiayaan (NTF): ${ntf}\n` +
+                         `• Bunga Pokok: ${flatRate.toFixed(2).replace('.', ',')}% / tahun\n` +
+                         `• Tenor: *${currentTenor} Bulan*\n` +
+                         `• Angsuran: *${installment} / bulan*\n` +
+                         `----------------------------------\n` +
+                         `_Catatan: Simulasi sudah termasuk perlindungan asuransi._`;
+
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            showToast('Rincian penawaran berhasil disalin untuk WhatsApp!');
+        }
+
+        // Tampilkan Notifikasi Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Jalankan saat halaman dimuat
+        window.onload = function() {
+            switchCategory('elektronik');
+        };
+    </script>
+</body>
+</html>
