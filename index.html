@@ -158,82 +158,33 @@
           <!-- 4. Tenor Pembiayaan -->
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-2">4. Tenor Pembiayaan (Bulan)</label>
-            <div class="grid grid-cols-5 gap-2">
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
               <button type="button" data-tenor="6" onclick="setTenor(6)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">6 Bln</button>
               <button type="button" data-tenor="9" onclick="setTenor(9)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">9 Bln</button>
               <button type="button" data-tenor="12" onclick="setTenor(12)" class="tenor-btn py-2 text-xs font-bold rounded-xl border-2 border-blue-600 bg-blue-600 text-white shadow-sm transition-all cursor-pointer">12 Bln</button>
               <button type="button" data-tenor="15" onclick="setTenor(15)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">15 Bln</button>
               <button type="button" data-tenor="18" onclick="setTenor(18)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">18 Bln</button>
+              <button type="button" data-tenor="24" onclick="setTenor(24)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">24 Bln</button>
             </div>
           </div>
 
           <!-- 5. Biaya Admin (Rp atau %) & Cara Bayar -->
+          <!-- 6. Skema Suku Bunga (Otomatis / Promo / Manual) -->
           <div class="pt-1 border-t border-slate-100">
-            <div class="flex items-center justify-between mb-1.5">
-              <label for="input-admin-rp" class="block text-xs font-bold text-slate-700">5. Biaya Admin</label>
-              <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200">
-                <button type="button" id="btn-admin-type-rp" onclick="setAdminType('rp')"
-                  class="px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer">
-                  Nominal (Rp)
-                </button>
-                <button type="button" id="btn-admin-type-pct" onclick="setAdminType('pct')"
-                  class="px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
-                  Persen (%)
-                </button>
-              </div>
-            </div>
-
-            <!-- Input Nominal Admin -->
-            <div id="admin-rp-wrapper" class="relative mb-2">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-sm font-bold text-slate-400 pointer-events-none">Rp</span>
-              <input type="text" id="input-admin-rp" value="200.000" inputmode="numeric"
-                oninput="handleCurrencyInput(this, 'adminRp')"
-                class="w-full pl-10 pr-4 py-2 text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                placeholder="0" />
-            </div>
-
-            <!-- Input Persen Admin -->
-            <div id="admin-pct-wrapper" class="hidden mb-2">
-              <div class="flex items-center gap-2">
-                <div class="relative flex-1">
-                  <input type="number" id="input-admin-pct" value="5" step="0.1" min="0" max="100"
-                    oninput="handleAdminPctInput(this)"
-                    class="w-full pl-3.5 pr-9 py-2 text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                    placeholder="0" />
-                  <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-sm font-bold text-slate-400 pointer-events-none">%</span>
-                </div>
-                <div class="px-3 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 whitespace-nowrap" id="admin-pct-preview">
-                  = Rp 300.000
-                </div>
-              </div>
-              <p class="text-[11px] text-slate-500 mt-1">*Dihitung dari Pokok Pembiayaan Murni (OTR - DP)</p>
-            </div>
-
-            <!-- Cara Bayar Admin -->
-            <div class="grid grid-cols-2 gap-2">
-              <button type="button" id="btn-admin-upfront" onclick="setAdminMode('upfront')"
-                class="py-2 px-3 rounded-xl border-2 border-blue-600 bg-blue-50/70 text-blue-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
-                <span>Bayar di Awal (TDP)</span>
-              </button>
-              <button type="button" id="btn-admin-loan" onclick="setAdminMode('loan')"
-                class="py-2 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:border-slate-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer">
-                <span>As Loan (Masuk Pokok)</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- 6. Skema Suku Bunga (Otomatis / Manual) -->
-          <div class="pt-1 border-t border-slate-100">
-            <div class="flex items-center justify-between mb-1.5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
               <label class="block text-xs font-bold text-slate-700">6. Suku Bunga Pembiayaan</label>
               <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200">
                 <button type="button" id="btn-rate-auto" onclick="setRateMode('auto')"
                   class="px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer">
                   Otomatis
                 </button>
+                <button type="button" id="btn-rate-promo" onclick="setRateMode('promo')"
+                  class="px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
+                  Promo
+                </button>
                 <button type="button" id="btn-rate-manual" onclick="setRateMode('manual')"
                   class="px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
-                  Input Manual
+                  Manual
                 </button>
               </div>
             </div>
@@ -247,6 +198,121 @@
               <div class="text-right">
                 <span id="auto-rate-display" class="text-sm font-extrabold text-blue-600">6,46%</span>
                 <span class="block text-[10px] text-slate-400">/ bulan</span>
+              </div>
+            </div>
+
+            <!-- Mode Promo -->
+            <div id="rate-promo-box" class="hidden space-y-2.5">
+              <div class="space-y-1.5 max-h-64 overflow-y-auto custom-scrollbar pr-1" id="promo-list-container">
+                <!-- Promo 1 -->
+                <button type="button" data-promo="p099" onclick="selectPromo('p099')"
+                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50/70 transition-all cursor-pointer">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-extrabold text-blue-700">0,99% flat/bln</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">Spesial</span>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-700 mt-0.5">Cicilan Ringan Spesial</p>
+                </button>
+
+                <!-- Promo 2 -->
+                <button type="button" data-promo="p129" onclick="selectPromo('p129')"
+                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-extrabold text-slate-800">1,29% flat/bln</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">RO Non-Gadget</span>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Khusus Konsumen RO untuk Non Gadget</p>
+                </button>
+
+                <!-- Promo 3 -->
+                <button type="button" data-promo="p199ro" onclick="selectPromo('p199ro')"
+                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-extrabold text-slate-800">1,99% flat/bln</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700">RO Gadget • 6–15 Bln</span>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Khusus Konsumen RO untuk Gadget (tenor 6, 9, 12, 15 bln)</p>
+                </button>
+
+                <!-- Promo 4 -->
+                <button type="button" data-promo="perafone" onclick="selectPromo('perafone')"
+                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-extrabold text-slate-800">1,99% – 2,45% flat/bln</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700">Partner • 6–12 Bln</span>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Bunga Ringan Erafone, iBox, dan NASA (tenor 6, 9, 12 bln)</p>
+                </button>
+
+                <!-- Promo 5 -->
+                <button type="button" data-promo="p255" onclick="selectPromo('p255')"
+                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-extrabold text-slate-800">2,55% flat/bln</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">6–24 Bln</span>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Program Reguler – Low Interest (tenor 6–24 bln)</p>
+                </button>
+
+                <!-- Promo 6 -->
+                <button type="button" data-promo="plong" onclick="selectPromo('plong')"
+                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-extrabold text-slate-800">3,25% / 3,50% / 3,75%</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700">15 / 18 / 24 Bln</span>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Cicilan Ringan Tenor Panjang (15 bln: 3,25%, 18 bln: 3,50%, 24 bln: 3,75%)</p>
+                </button>
+
+                <!-- Promo 7 -->
+                <button type="button" data-promo="p399" onclick="selectPromo('p399')"
+                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-extrabold text-slate-800">3,99% flat/bln</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">18 & 24 Bln</span>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Program Reguler – Standard untuk tenor 18 & 24 bulan</p>
+                </button>
+
+                <!-- Promo 8 -->
+                <button type="button" data-promo="p469" onclick="selectPromo('p469')"
+                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-extrabold text-slate-800">4,69% flat/bln</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700">Free Admin</span>
+                  </div>
+                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Program Reguler – Free Admin</p>
+                </button>
+              </div>
+
+              <!-- Sub-kontrol khusus Erafone / iBox / NASA -->
+              <div id="promo-erafone-sub" class="hidden bg-amber-50/70 border border-amber-200 rounded-xl p-2.5 space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-amber-900">Pilih Rate Partner (Erafone / iBox / NASA):</span>
+                  <span id="erafone-rate-badge" class="text-xs font-extrabold text-amber-700">2,45% flat</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5">
+                  <button type="button" onclick="setErafoneRate(1.99)" id="btn-era-199" class="py-1 text-[11px] font-bold rounded-lg border border-amber-300 bg-white text-amber-800 hover:bg-amber-100 transition-all cursor-pointer">1,99% (6 Bln)</button>
+                  <button type="button" onclick="setErafoneRate(2.25)" id="btn-era-225" class="py-1 text-[11px] font-bold rounded-lg border border-amber-300 bg-white text-amber-800 hover:bg-amber-100 transition-all cursor-pointer">2,25% (9 Bln)</button>
+                  <button type="button" onclick="setErafoneRate(2.45)" id="btn-era-245" class="py-1 text-[11px] font-bold rounded-lg border-2 border-amber-600 bg-amber-600 text-white transition-all cursor-pointer">2,45% (12 Bln)</button>
+                </div>
+              </div>
+
+              <!-- Sub-kontrol khusus Free Admin -->
+              <div id="promo-freeadmin-sub" class="hidden bg-rose-50/70 border border-rose-200 rounded-xl p-2.5 flex items-center justify-between gap-2">
+                <span class="text-[11px] font-semibold text-rose-800">Promo bebas biaya admin:</span>
+                <button type="button" onclick="applyFreeAdmin()" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-sm transition-all cursor-pointer">
+                  Set Admin Rp 0
+                </button>
+              </div>
+
+              <!-- Ringkasan Rate Promo Terpilih -->
+              <div class="bg-blue-50/70 border border-blue-200 rounded-xl px-3 py-2 flex items-center justify-between">
+                <div>
+                  <p id="promo-active-title" class="text-[11px] font-bold text-blue-900">Cicilan Ringan Spesial</p>
+                  <p id="promo-active-note" class="text-[10px] text-blue-700">Flat 0,99%/bln (Setara ~1,79% Efektif/bln)</p>
+                </div>
+                <span id="promo-active-rate" class="text-sm font-extrabold text-blue-700">0,99%</span>
               </div>
             </div>
 
@@ -438,7 +504,9 @@
       adminRp: 200000,
       adminPct: 5,
       adminMode: 'upfront',        // 'upfront' | 'loan'
-      rateMode: 'auto',            // 'auto' | 'manual'
+      rateMode: 'auto',            // 'auto' | 'promo' | 'manual'
+      selectedPromo: 'p099',
+      erafoneRate: 2.45,
       manualRateType: 'effective', // 'effective' | 'flat'
       manualRateValue: 3.50,
       assetInsMode: 'auto',        // 'auto' | 'manual'
@@ -446,129 +514,134 @@
     };
 
     // Format Angka Rupiah
-    function formatRp(num) {
-      return 'Rp ' + Math.round(num).toLocaleString('id-ID');
-    }
-
-    function formatNumberOnly(num) {
-      return Math.round(num).toLocaleString('id-ID');
-    }
-
-    function parseFormattedNumber(str) {
-      const cleaned = String(str).replace(/[^0-9]/g, '');
-      return cleaned ? parseInt(cleaned, 10) : 0;
-    }
-
-    // Handle Input Currency
-    function handleCurrencyInput(el, field) {
-      const val = parseFormattedNumber(el.value);
-      state[field] = val;
-      el.value = val > 0 ? formatNumberOnly(val) : '0';
-      calculate();
-    }
-
-    // Set Kategori
-    function setCategory(cat) {
-      state.category = cat;
-      const btnGadget = document.getElementById('btn-cat-gadget');
-      const btnElek = document.getElementById('btn-cat-elektronik');
-
-      if (cat === 'gadget') {
-        btnGadget.className = 'h-24 px-3 rounded-xl border-2 border-blue-600 bg-blue-50/70 text-blue-700 flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer';
-        btnElek.className = 'h-24 px-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer';
-      } else {
-        btnElek.className = 'h-24 px-3 rounded-xl border-2 border-blue-600 bg-blue-50/70 text-blue-700 flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer';
-        btnGadget.className = 'h-24 px-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer';
-      }
-      calculate();
-    }
-
-    // Set DP Preset
-    function setDpPercent(pct) {
-      const dpVal = Math.round((state.otr * pct) / 100);
-      state.dp = dpVal;
-      document.getElementById('input-dp').value = formatNumberOnly(dpVal);
-      calculate();
-    }
-
-    // Set Tenor
-    function setTenor(t) {
-      state.tenor = t;
-      document.querySelectorAll('.tenor-btn').forEach(btn => {
-        const btnTenor = parseInt(btn.getAttribute('data-tenor'), 10);
-        if (btnTenor === t) {
-          btn.className = 'tenor-btn py-2 text-xs font-bold rounded-xl border-2 border-blue-600 bg-blue-600 text-white shadow-sm transition-all cursor-pointer';
-        } else {
-          btn.className = 'tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer';
-        }
-      });
-      calculate();
-    }
-
-    // Set Admin Type (Rp vs %)
-    function setAdminType(type) {
-      state.adminType = type;
-      const btnRp = document.getElementById('btn-admin-type-rp');
-      const btnPct = document.getElementById('btn-admin-type-pct');
-      const wrapRp = document.getElementById('admin-rp-wrapper');
-      const wrapPct = document.getElementById('admin-pct-wrapper');
-
-      if (type === 'rp') {
-        btnRp.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer';
-        btnPct.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer';
-        wrapRp.classList.remove('hidden');
-        wrapPct.classList.add('hidden');
-      } else {
-        btnPct.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer';
-        btnRp.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer';
-        wrapPct.classList.remove('hidden');
-        wrapRp.classList.add('hidden');
-      }
-      calculate();
-    }
-
-    function handleAdminPctInput(el) {
-      const val = parseFloat(el.value);
-      state.adminPct = isNaN(val) ? 0 : Math.max(0, val);
-      calculate();
-    }
-
-    // Set Admin Mode (Upfront vs Loan)
-    function setAdminMode(mode) {
-      state.adminMode = mode;
-      const btnUp = document.getElementById('btn-admin-upfront');
-      const btnLoan = document.getElementById('btn-admin-loan');
-
-      if (mode === 'upfront') {
-        btnUp.className = 'py-2 px-3 rounded-xl border-2 border-blue-600 bg-blue-50/70 text-blue-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer';
-        btnLoan.className = 'py-2 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:border-slate-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer';
-      } else {
-        btnLoan.className = 'py-2 px-3 rounded-xl border-2 border-blue-600 bg-blue-50/70 text-blue-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer';
-        btnUp.className = 'py-2 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:border-slate-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer';
-      }
-      calculate();
-    }
-
-    // Set Rate Mode (Auto vs Manual)
+    // Set Rate Mode (Auto vs Promo vs Manual)
     function setRateMode(mode) {
       state.rateMode = mode;
       const btnAuto = document.getElementById('btn-rate-auto');
+      const btnPromo = document.getElementById('btn-rate-promo');
       const btnMan = document.getElementById('btn-rate-manual');
       const boxAuto = document.getElementById('rate-auto-box');
+      const boxPromo = document.getElementById('rate-promo-box');
       const boxMan = document.getElementById('rate-manual-box');
 
-      if (mode === 'auto') {
-        btnAuto.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer';
-        btnMan.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer';
-        boxAuto.classList.remove('hidden');
-        boxMan.classList.add('hidden');
-      } else {
-        btnMan.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer';
-        btnAuto.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer';
-        boxMan.classList.remove('hidden');
-        boxAuto.classList.add('hidden');
+      const activeCls = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer';
+      const inactiveCls = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer';
+
+      btnAuto.className = mode === 'auto' ? activeCls : inactiveCls;
+      btnPromo.className = mode === 'promo' ? activeCls : inactiveCls;
+      btnMan.className = mode === 'manual' ? activeCls : inactiveCls;
+
+      boxAuto.classList.toggle('hidden', mode !== 'auto');
+      boxPromo.classList.toggle('hidden', mode !== 'promo');
+      boxMan.classList.toggle('hidden', mode !== 'manual');
+
+      if (mode === 'promo') {
+        updatePromoUI();
       }
       calculate();
+    }
+
+    // Pilih Program Promo
+    function selectPromo(promoId) {
+      state.selectedPromo = promoId;
+
+      // Penyesuaian kategori & tenor otomatis sesuai syarat masing-masing promo
+      if (promoId === 'p129' && state.category === 'gadget') {
+        setCategory('elektronik');
+      } else if (promoId === 'p199ro') {
+        if (state.category !== 'gadget') setCategory('gadget');
+        if (![6, 9, 12, 15].includes(state.tenor)) setTenor(12);
+      } else if (promoId === 'perafone') {
+        if (state.category !== 'gadget') setCategory('gadget');
+        if (![6, 9, 12].includes(state.tenor)) setTenor(12);
+        if (state.tenor === 6) state.erafoneRate = 1.99;
+        else if (state.tenor === 9) state.erafoneRate = 2.25;
+        else state.erafoneRate = 2.45;
+      } else if (promoId === 'plong') {
+        if (![15, 18, 24].includes(state.tenor)) setTenor(18);
+      } else if (promoId === 'p399') {
+        if (![18, 24].includes(state.tenor)) setTenor(18);
+      }
+
+      updatePromoUI();
+      calculate();
+    }
+
+    function setErafoneRate(rateVal) {
+      state.erafoneRate = rateVal;
+      if (rateVal === 1.99 && state.tenor !== 6) setTenor(6);
+      else if (rateVal === 2.25 && state.tenor !== 9) setTenor(9);
+      else if (rateVal === 2.45 && state.tenor !== 12) setTenor(12);
+      updatePromoUI();
+      calculate();
+    }
+
+    function applyFreeAdmin() {
+      state.adminType = 'rp';
+      state.adminRp = 0;
+      document.getElementById('input-admin-rp').value = '0';
+      setAdminType('rp');
+    }
+
+    function updatePromoUI() {
+      document.querySelectorAll('.promo-option-btn').forEach(btn => {
+        const id = btn.getAttribute('data-promo');
+        if (id === state.selectedPromo) {
+          btn.className = 'promo-option-btn w-full text-left p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50/70 transition-all cursor-pointer';
+          btn.querySelector('span').classList.remove('text-slate-800');
+          btn.querySelector('span').classList.add('text-blue-700');
+        } else {
+          btn.className = 'promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer';
+          btn.querySelector('span').classList.remove('text-blue-700');
+          btn.querySelector('span').classList.add('text-slate-800');
+        }
+      });
+
+      const eraBox = document.getElementById('promo-erafone-sub');
+      const freeAdminBox = document.getElementById('promo-freeadmin-sub');
+      eraBox.classList.toggle('hidden', state.selectedPromo !== 'perafone');
+      freeAdminBox.classList.toggle('hidden', state.selectedPromo !== 'p469');
+
+      if (state.selectedPromo === 'perafone') {
+        document.getElementById('erafone-rate-badge').textContent = state.erafoneRate.toFixed(2).replace('.', ',') + '% flat';
+        [199, 225, 245].forEach(code => {
+          const val = code / 100;
+          const btn = document.getElementById('btn-era-' + code);
+          if (Math.abs(state.erafoneRate - val) < 0.001) {
+            btn.className = 'py-1 text-[11px] font-bold rounded-lg border-2 border-amber-600 bg-amber-600 text-white transition-all cursor-pointer';
+          } else {
+            btn.className = 'py-1 text-[11px] font-bold rounded-lg border border-amber-300 bg-white text-amber-800 hover:bg-amber-100 transition-all cursor-pointer';
+          }
+        });
+      }
+    }
+
+    function getSelectedPromoDetails(tenor) {
+      switch (state.selectedPromo) {
+        case 'p099':
+          return { flatRate: 0.99, title: 'Cicilan Ringan Spesial' };
+        case 'p129':
+          return { flatRate: 1.29, title: 'Khusus Konsumen RO (Non Gadget)' };
+        case 'p199ro':
+          return { flatRate: 1.99, title: 'Khusus Konsumen RO (Gadget)' };
+        case 'perafone':
+          return { flatRate: state.erafoneRate, title: 'Bunga Ringan Erafone, iBox & NASA' };
+        case 'p255':
+          return { flatRate: 2.55, title: 'Program Reguler – Low Interest' };
+        case 'plong': {
+          let r = 3.50;
+          if (tenor <= 15) r = 3.25;
+          else if (tenor === 18) r = 3.50;
+          else r = 3.75;
+          return { flatRate: r, title: `Cicilan Ringan Tenor Panjang (${tenor} Bln)` };
+        }
+        case 'p399':
+          return { flatRate: 3.99, title: 'Program Reguler – Standard (18 & 24 Bln)' };
+        case 'p469':
+          return { flatRate: 4.69, title: 'Program Reguler – Free Admin' };
+        default:
+          return { flatRate: 2.55, title: 'Program Reguler – Low Interest' };
+      }
     }
 
     function setManualRateType(type) {
@@ -645,11 +718,13 @@
         if (tenor <= 6) ratePct = 6.0;
         else if (tenor <= 9) ratePct = 8.0;
         else if (tenor <= 12) ratePct = 10.0;
-        else ratePct = 15.0;
+        else if (tenor <= 18) ratePct = 15.0;
+        else ratePct = 18.0;
       } else {
         if (tenor <= 9) ratePct = 4.5;
         else if (tenor <= 12) ratePct = 5.5;
-        else ratePct = 7.5;
+        else if (tenor <= 18) ratePct = 7.5;
+        else ratePct = 9.0;
       }
       const amount = Math.ceil((otr * ratePct / 100) / 500) * 500;
       return { ratePct, amount };
@@ -724,6 +799,13 @@
         effMonthlyPct = autoRate.rate;
         document.getElementById('auto-promo-label').textContent = autoRate.label;
         document.getElementById('auto-rate-display').textContent = effMonthlyPct.toFixed(2).replace('.', ',') + '%';
+      } else if (state.rateMode === 'promo') {
+        const promoInfo = getSelectedPromoDetails(tenor);
+        effMonthlyPct = flatToEffectiveMonthly(promoInfo.flatRate, tenor);
+        document.getElementById('promo-active-title').textContent = promoInfo.title;
+        document.getElementById('promo-active-rate').textContent = promoInfo.flatRate.toFixed(2).replace('.', ',') + '%';
+        document.getElementById('promo-active-note').textContent =
+          `Flat ${promoInfo.flatRate.toFixed(2).replace('.', ',')}%/bln (Setara ~${effMonthlyPct.toFixed(2).replace('.', ',')}% Efektif/bln)`;
       } else {
         if (state.manualRateType === 'effective') {
           effMonthlyPct = state.manualRateValue;
@@ -878,6 +960,8 @@
       state.adminPct = 5;
       state.adminMode = 'upfront';
       state.rateMode = 'auto';
+      state.selectedPromo = 'p099';
+      state.erafoneRate = 2.45;
       state.manualRateType = 'effective';
       state.manualRateValue = 3.50;
       state.assetInsMode = 'auto';
