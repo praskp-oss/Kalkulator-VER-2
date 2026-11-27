@@ -1,1052 +1,1094 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simulasi Kredit & Amortisasi</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    body {
-      background-color: #f8fafc;
-      color: #0f172a;
-    }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-  </style>
-</head>
-<body class="antialiased min-h-screen flex flex-col">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#2563eb" />
+<meta name="description" content="Simulasi kredit gadget dan elektronik: angsuran, bayar pertama, dan jadwal amortisasi." />
+<title>Simulasi Kredit & Amortisasi</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Cpath d='M9 22V10m7 12V15m7 7V12' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#fff; --line:#e5e7eb; --line2:#f1f3f5;
+    --tx:#111827; --mut:#6b7280; --pri:#2563eb; --pri-d:#1d4ed8; --soft:#eff6ff; --soft-b:#bfdbfe;
+    --amb:#b45309; --grn:#047857; --warn-bg:#fffbeb; --warn-b:#fde68a; --warn-t:#92400e;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  [hidden]{display:none!important}
+  button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  :focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+  h1,h2,h3,p{margin:0}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
 
-  <!-- Header -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-sm shadow-blue-600/20">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
+  /* Header */
+  .top{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .bar{height:60px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px;min-width:0}
+  .logo{width:34px;height:34px;border-radius:9px;background:var(--pri);display:grid;place-items:center;flex:none}
+  .brand h1{font-size:16px;font-weight:700;line-height:1.2}
+  .brand p{font-size:12px;color:var(--mut)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border-radius:10px;font-weight:600;font-size:14px;border:1px solid var(--line);background:#fff}
+  .btn:hover:not(:disabled){background:#f9fafb}
+  .btn.primary{background:var(--pri);border-color:var(--pri);color:#fff}
+  .btn.primary:hover:not(:disabled){background:var(--pri-d)}
+
+  /* Layout */
+  .layout{display:grid;gap:16px;padding:16px 16px 96px}
+  .stack{display:grid;gap:16px;min-width:0}
+  @media(min-width:1024px){
+    .layout{grid-template-columns:5fr 7fr;align-items:start;padding-bottom:32px}
+  }
+
+  /* Cards */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card > h2{font-size:15px;font-weight:700;margin-bottom:14px}
+  .field + .field{margin-top:18px}
+  .lbl{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:600;margin-bottom:8px}
+  .hint{font-size:12px;color:var(--mut);margin-top:6px}
+  .badge{font-size:12px;font-weight:700;color:var(--pri);background:var(--soft);padding:1px 8px;border-radius:999px}
+
+  /* Inputs */
+  .money{position:relative}
+  .money > span{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-weight:600;color:var(--mut);pointer-events:none}
+  .money input, .num input{width:100%;padding:11px 12px 11px 38px;font:inherit;font-weight:700;border:1px solid #d1d5db;border-radius:10px;background:#f9fafb;color:var(--tx)}
+  .num{position:relative}
+  .num input{padding:11px 70px 11px 12px}
+  .num > span{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--mut);pointer-events:none}
+  .money input:focus, .num input:focus{outline:2px solid var(--pri);outline-offset:0;background:#fff;border-color:var(--pri)}
+  input[type=number]{-moz-appearance:textfield}
+  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+
+  /* Buttons grup */
+  .choice{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .choice button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border:2px solid var(--line);border-radius:12px;background:#fff;font-weight:600;font-size:13px;color:#4b5563}
+  .choice button.on{border-color:var(--pri);background:var(--soft);color:var(--pri-d)}
+  .chips{display:grid;gap:8px}
+  .chips.c4{grid-template-columns:repeat(4,1fr)}
+  .chips.c3{grid-template-columns:repeat(3,1fr)}
+  .chips.c6{grid-template-columns:repeat(3,1fr)}
+  @media(min-width:520px){.chips.c6{grid-template-columns:repeat(6,1fr)}}
+  .chip{padding:9px 4px;border:1px solid #d1d5db;border-radius:10px;background:#fff;font-weight:600;font-size:13px;text-align:center}
+  .chip:hover{border-color:#93c5fd}
+  .chip.on{background:var(--pri);border-color:var(--pri);color:#fff}
+  .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:#f1f3f5;border-radius:10px;padding:3px;gap:2px}
+  .seg button{padding:7px 8px;border-radius:8px;font-size:13px;font-weight:600;color:#4b5563}
+  .seg button.on{background:#fff;color:var(--pri-d);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+  /* Panel bunga */
+  .panel{margin-top:12px}
+  .info{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f9fafb;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .info b{font-size:14px}
+  .info small{display:block;font-size:12px;color:var(--mut)}
+  .info .big{font-size:18px;font-weight:800;color:var(--pri);text-align:right;white-space:nowrap}
+  .info .big small{font-weight:500}
+  .promos{display:grid;gap:6px;max-height:300px;overflow-y:auto;padding-right:2px}
+  .opt{text-align:left;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .opt:hover{border-color:#93c5fd}
+  .opt.on{border:2px solid var(--pri);background:var(--soft);padding:9px 11px}
+  .opt .r{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .opt .r b{font-size:14px}
+  .opt.on .r b{color:var(--pri-d)}
+  .opt .t{font-size:11px;font-weight:600;color:#4b5563;background:#f1f3f5;padding:1px 8px;border-radius:999px;white-space:nowrap}
+  .opt .d{font-size:12px;color:var(--mut);margin-top:2px}
+  .note{margin-top:10px;font-size:13px;border-radius:10px;padding:10px 12px;background:var(--soft);border:1px solid var(--soft-b);color:#1e3a8a}
+  .note.warn{background:var(--warn-bg);border-color:var(--warn-b);color:var(--warn-t)}
+  .sub-chips{margin-top:10px}
+
+  /* Fold */
+  details.fold{padding:0}
+  details.fold > summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  details.fold > summary::-webkit-details-marker{display:none}
+  details.fold > summary h2{font-size:15px;font-weight:700}
+  details.fold > summary small{display:block;font-size:12px;color:var(--mut);margin-top:2px;font-weight:400}
+  details.fold > summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(45deg);transition:transform .15s;flex:none;margin-right:4px}
+  details.fold[open] > summary::after{transform:rotate(-135deg)}
+  .fold-body{padding:0 18px 18px;border-top:1px solid var(--line2);padding-top:16px}
+
+  /* Hasil */
+  .hero{background:var(--pri);color:#fff;border-radius:14px;padding:20px}
+  .hero .k{font-size:13px;font-weight:600;color:#dbeafe}
+  .hero .v{font-size:36px;line-height:1.15;font-weight:800;letter-spacing:-.5px;margin-top:2px;font-variant-numeric:tabular-nums}
+  .hero .s{font-size:13px;color:#dbeafe}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.25)}
+  .stats .k{font-size:12px}
+  .stats .v{font-size:18px;font-weight:700;margin-top:0}
+  .stats .s{font-size:12px;margin-top:1px}
+
+  .export{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px}
+  .export p{font-size:13px;color:var(--mut);flex:1 1 200px}
+  .export p b{display:block;color:var(--tx);font-size:14px}
+  .export .acts{display:flex;gap:8px}
+
+  .rows .row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+  .rows .row span{color:#4b5563}
+  .rows .row b{text-align:right;font-variant-numeric:tabular-nums}
+  .rows .row.sub{background:#f9fafb;margin:0 -18px;padding:9px 18px}
+  .rows .row.sub span{color:var(--tx);font-weight:600}
+  .rows .row.total{border:0;margin:6px -18px -18px;padding:14px 18px;background:var(--soft);border-radius:0 0 14px 14px}
+  .rows .row.total span{color:var(--tx);font-weight:700}
+  .rows .row.total b{font-size:17px;color:var(--pri-d)}
+
+  .tbl-wrap{overflow:auto;max-height:420px;border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+  th,td{padding:8px 10px;text-align:right;white-space:nowrap}
+  th:first-child,td:first-child{text-align:center}
+  thead th{position:sticky;top:0;background:#f9fafb;font-size:12px;color:#4b5563;border-bottom:1px solid var(--line)}
+  tbody tr:nth-child(even){background:#fafbfc}
+  tbody td{border-bottom:1px solid var(--line2)}
+  tbody td:nth-child(3){color:var(--grn)}
+  tbody td:nth-child(4){color:var(--amb)}
+  tfoot td{position:sticky;bottom:0;background:var(--soft);font-weight:700;border-top:1px solid var(--soft-b)}
+  .empty{padding:28px 12px;text-align:center;color:var(--mut)}
+
+  /* Bar bawah mobile */
+  .mbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:#fff;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:12px;transition:transform .2s}
+  .mbar.off{transform:translateY(110%)}
+  .mbar small{display:block;font-size:12px;color:var(--mut)}
+  .mbar b{font-size:18px;font-variant-numeric:tabular-nums}
+  @media(min-width:1024px){.mbar{display:none}}
+
+  .toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;z-index:40;max-width:90vw;text-align:center}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap bar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6 19V9m6 10V5m6 14v-7"/></svg>
+      </span>
+      <div>
+        <h1>Simulasi Kredit & Amortisasi</h1>
+        <p>Gadget & elektronik</p>
+      </div>
+    </div>
+    <button type="button" class="btn" id="btn-reset">Reset</button>
+  </div>
+</header>
+
+<main class="wrap layout">
+
+  <!-- ===== FORM ===== -->
+  <div class="stack">
+
+    <section class="card" aria-labelledby="h-data">
+      <h2 id="h-data">Data pembiayaan</h2>
+
+      <div class="field">
+        <span class="lbl">Kategori barang</span>
+        <div class="choice">
+          <button type="button" data-key="category" data-val="gadget">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11.5 18h1"/></svg>
+            Gadget / HP
+          </button>
+          <button type="button" data-key="category" data-val="elektronik">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+            Elektronik rumah
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lbl" for="input-otr">Harga barang (OTR)</label>
+        <div class="money"><span>Rp</span>
+          <input id="input-otr" inputmode="numeric" autocomplete="off" placeholder="0" onfocus="this.select()" oninput="onMoney(this,'otr')" />
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="lbl"><label for="input-dp">Uang muka (DP)</label><span class="badge" id="dp-badge">0%</span></div>
+        <div class="money" style="margin-bottom:8px"><span>Rp</span>
+          <input id="input-dp" inputmode="numeric" autocomplete="off" placeholder="0" onfocus="this.select()" oninput="onMoney(this,'dp')" />
+        </div>
+        <div class="chips c4">
+          <button type="button" class="chip" data-key="dpPct" data-val="0">0%</button>
+          <button type="button" class="chip" data-key="dpPct" data-val="10">10%</button>
+          <button type="button" class="chip" data-key="dpPct" data-val="20">20%</button>
+          <button type="button" class="chip" data-key="dpPct" data-val="30">30%</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Tenor (lama cicilan)</span>
+        <div class="chips c6">
+          <button type="button" class="chip" data-key="tenor" data-val="6">6 bln</button>
+          <button type="button" class="chip" data-key="tenor" data-val="9">9 bln</button>
+          <button type="button" class="chip" data-key="tenor" data-val="12">12 bln</button>
+          <button type="button" class="chip" data-key="tenor" data-val="15">15 bln</button>
+          <button type="button" class="chip" data-key="tenor" data-val="18">18 bln</button>
+          <button type="button" class="chip" data-key="tenor" data-val="24">24 bln</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="h-bunga">
+      <div class="lbl" style="margin-bottom:12px">
+        <h2 id="h-bunga" style="margin:0">Suku bunga</h2>
+        <div class="seg" style="min-width:200px">
+          <button type="button" data-key="rateMode" data-val="auto">Otomatis</button>
+          <button type="button" data-key="rateMode" data-val="promo">Promo</button>
+          <button type="button" data-key="rateMode" data-val="manual">Manual</button>
+        </div>
+      </div>
+
+      <!-- Otomatis -->
+      <div data-when="rateMode=auto">
+        <div class="info">
+          <div><b id="auto-label">-</b><small>Dihitung otomatis dari kategori, harga, DP, dan tenor.</small></div>
+          <div class="big"><span id="auto-rate">-</span><small>efektif / bulan</small></div>
+        </div>
+      </div>
+
+      <!-- Promo -->
+      <div data-when="rateMode=promo">
+        <div class="promos" id="promo-list"></div>
+
+        <div class="note warn" id="promo-warn" hidden></div>
+
+        <div class="note sub-chips" data-when="selectedPromo=perafone" style="background:var(--warn-bg);border-color:var(--warn-b);color:var(--warn-t)">
+          <div class="lbl" style="margin-bottom:8px"><span>Pilih rate partner</span><b id="era-badge">-</b></div>
+          <div class="chips c3">
+            <button type="button" class="chip" data-key="erafoneRate" data-val="1.99">1,99% (6 bln)</button>
+            <button type="button" class="chip" data-key="erafoneRate" data-val="2.25">2,25% (9 bln)</button>
+            <button type="button" class="chip" data-key="erafoneRate" data-val="2.45">2,45% (12 bln)</button>
+          </div>
+        </div>
+
+        <div class="note" data-when="selectedPromo=p469" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <span>Promo ini bebas biaya admin.</span>
+          <button type="button" class="btn primary" style="padding:6px 12px;font-size:13px" id="btn-free-admin">Set admin Rp 0</button>
+        </div>
+
+        <div class="info" style="margin-top:10px;background:var(--soft);border-color:var(--soft-b)">
+          <div><b id="promo-title">-</b><small id="promo-note">-</small></div>
+          <div class="big" id="promo-rate">-</div>
+        </div>
+      </div>
+
+      <!-- Manual -->
+      <div data-when="rateMode=manual">
+        <div class="seg" style="margin-bottom:10px">
+          <button type="button" data-key="manualRateType" data-val="effective">Bunga efektif</button>
+          <button type="button" data-key="manualRateType" data-val="flat">Bunga flat</button>
+        </div>
+        <div class="num">
+          <input type="number" id="input-manual-rate" step="0.01" min="0" max="100" placeholder="0,00" oninput="onManualRate(this)" />
+          <span>% / bulan</span>
+        </div>
+        <p class="hint">Efektif: bunga dihitung dari sisa pokok. Flat: bunga dihitung dari pokok awal.</p>
+      </div>
+    </section>
+
+    <details class="card fold" id="fold-extra">
+      <summary>
+        <div>
+          <h2>Biaya admin & asuransi</h2>
+          <small id="extra-summary">-</small>
+        </div>
+      </summary>
+      <div class="fold-body">
+
+        <div class="field">
+          <div class="lbl">
+            <span>Biaya admin</span>
+            <div class="seg" style="min-width:110px">
+              <button type="button" data-key="adminType" data-val="rp">Rp</button>
+              <button type="button" data-key="adminType" data-val="pct">%</button>
+            </div>
+          </div>
+          <div class="money" data-when="adminType=rp"><span>Rp</span>
+            <input id="input-admin-rp" inputmode="numeric" autocomplete="off" placeholder="0" onfocus="this.select()" oninput="onMoney(this,'adminRp')" />
+          </div>
+          <div data-when="adminType=pct">
+            <div class="num">
+              <input type="number" id="input-admin-pct" step="0.1" min="0" max="100" oninput="onAdminPct(this)" />
+              <span>% dari NTF</span>
+            </div>
+            <p class="hint" id="admin-pct-preview">-</p>
+          </div>
+          <div class="seg" style="margin-top:10px">
+            <button type="button" data-key="adminMode" data-val="upfront">Dibayar di awal</button>
+            <button type="button" data-key="adminMode" data-val="loan">Masuk pokok</button>
+          </div>
+          <p class="hint">"Dibayar di awal" menambah bayar pertama. "Masuk pokok" ikut dicicil.</p>
+        </div>
+
+        <div class="field">
+          <div class="lbl">
+            <span>Asuransi barang</span>
+            <div class="seg" style="min-width:150px">
+              <button type="button" data-key="assetInsMode" data-val="auto">Otomatis</button>
+              <button type="button" data-key="assetInsMode" data-val="manual">Manual</button>
+            </div>
+          </div>
+          <div data-when="assetInsMode=auto">
+            <div class="info">
+              <div><b>Tarif sesuai kategori & tenor</b><small id="ins-auto-desc">-</small></div>
+              <div class="big" style="color:var(--tx);font-size:16px" id="ins-auto-amount">-</div>
+            </div>
+          </div>
+          <div class="money" data-when="assetInsMode=manual"><span>Rp</span>
+            <input id="input-ins-manual" inputmode="numeric" autocomplete="off" placeholder="0" onfocus="this.select()" oninput="onMoney(this,'assetInsManual')" />
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <!-- ===== HASIL ===== -->
+  <div class="stack" id="hasil">
+
+    <section class="hero" id="hero" aria-live="polite">
+      <p class="k">Angsuran per bulan</p>
+      <p class="v" id="res-installment">Rp 0</p>
+      <p class="s" id="res-tenor">-</p>
+      <div class="stats">
+        <div>
+          <p class="k">Bayar pertama (TDP)</p>
+          <p class="v" id="res-tdp">Rp 0</p>
+          <p class="s" id="res-tdp-note">-</p>
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Simulasi Kredit & Amortisasi</h1>
-          <p class="text-xs text-slate-500 hidden sm:block">Kalkulator Pembiayaan Gadget & Elektronik</p>
+          <p class="k">Total pokok hutang</p>
+          <p class="v" id="res-principal">Rp 0</p>
+          <p class="s" id="res-principal-note">-</p>
         </div>
       </div>
+    </section>
 
-      <div class="flex items-center gap-2">
-        <button type="button" id="btn-download-pdf" onclick="downloadSnapshotPDF()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/20 transition-all cursor-pointer">
-          <svg id="pdf-icon" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <svg id="pdf-spinner" class="hidden w-3.5 h-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <span id="pdf-btn-text">Download PDF</span>
-        </button>
-
-        <button type="button" onclick="resetForm()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Reset
-        </button>
+    <section class="card export">
+      <p><b>Simpan hasil simulasi</b>PDF untuk dicetak atau dikirim. JPEG untuk dibagikan lewat chat.</p>
+      <div class="acts">
+        <button type="button" class="btn primary" id="btn-pdf">Unduh PDF</button>
+        <button type="button" class="btn" id="btn-jpg">Unduh JPEG</button>
       </div>
-    </div>
-  </header>
+    </section>
 
-  <!-- Main Content -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <section class="card" aria-labelledby="h-rincian">
+      <h2 id="h-rincian">Rincian pembiayaan</h2>
+      <div class="rows" id="breakdown"></div>
+    </section>
 
-      <!-- Left Column: Parameter Pembiayaan (5 cols) -->
-      <div class="lg:col-span-5 space-y-5">
-        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 space-y-5">
-          <div class="border-b border-slate-100 pb-3">
-            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Parameter Pembiayaan</h2>
-          </div>
-
-          <!-- 1. Kategori Barang -->
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-2">1. Kategori Barang</label>
-            <div class="grid grid-cols-2 gap-3">
-              <button type="button" id="btn-cat-gadget" onclick="setCategory('gadget')"
-                class="h-24 px-3 rounded-xl border-2 border-blue-600 bg-blue-50/70 text-blue-700 flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                <span class="text-xs font-bold">Gadget / HP</span>
-              </button>
-
-              <button type="button" id="btn-cat-elektronik" onclick="setCategory('elektronik')"
-                class="h-24 px-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span class="text-xs font-bold">Elektronik Rumah</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- 2. Harga Barang (OTR) -->
-          <div>
-            <label for="input-otr" class="block text-xs font-bold text-slate-700 mb-1.5">2. Harga Barang (OTR)</label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-sm font-bold text-slate-400 pointer-events-none">Rp</span>
-              <input type="text" id="input-otr" value="5.999.000" inputmode="numeric"
-                oninput="handleCurrencyInput(this, 'otr')"
-                class="w-full pl-10 pr-4 py-2.5 text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                placeholder="0" />
-            </div>
-          </div>
-
-          <!-- 3. Uang Muka (DP) -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label for="input-dp" class="block text-xs font-bold text-slate-700">3. Uang Muka (DP)</label>
-              <span id="dp-percent-badge" class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">0%</span>
-            </div>
-            <div class="relative mb-2">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-sm font-bold text-slate-400 pointer-events-none">Rp</span>
-              <input type="text" id="input-dp" value="0" inputmode="numeric"
-                oninput="handleCurrencyInput(this, 'dp')"
-                class="w-full pl-10 pr-4 py-2.5 text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                placeholder="0" />
-            </div>
-            <div class="grid grid-cols-4 gap-2">
-              <button type="button" onclick="setDpPercent(0)" class="py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors cursor-pointer">0%</button>
-              <button type="button" onclick="setDpPercent(10)" class="py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors cursor-pointer">10%</button>
-              <button type="button" onclick="setDpPercent(20)" class="py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors cursor-pointer">20%</button>
-              <button type="button" onclick="setDpPercent(30)" class="py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors cursor-pointer">30%</button>
-            </div>
-          </div>
-
-          <!-- 4. Tenor Pembiayaan -->
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-2">4. Tenor Pembiayaan (Bulan)</label>
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              <button type="button" data-tenor="6" onclick="setTenor(6)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">6 Bln</button>
-              <button type="button" data-tenor="9" onclick="setTenor(9)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">9 Bln</button>
-              <button type="button" data-tenor="12" onclick="setTenor(12)" class="tenor-btn py-2 text-xs font-bold rounded-xl border-2 border-blue-600 bg-blue-600 text-white shadow-sm transition-all cursor-pointer">12 Bln</button>
-              <button type="button" data-tenor="15" onclick="setTenor(15)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">15 Bln</button>
-              <button type="button" data-tenor="18" onclick="setTenor(18)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">18 Bln</button>
-              <button type="button" data-tenor="24" onclick="setTenor(24)" class="tenor-btn py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 transition-all cursor-pointer">24 Bln</button>
-            </div>
-          </div>
-
-          <!-- 5. Biaya Admin (Rp atau %) & Cara Bayar -->
-          <!-- 6. Skema Suku Bunga (Otomatis / Promo / Manual) -->
-          <div class="pt-1 border-t border-slate-100">
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <label class="block text-xs font-bold text-slate-700">6. Suku Bunga Pembiayaan</label>
-              <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200">
-                <button type="button" id="btn-rate-auto" onclick="setRateMode('auto')"
-                  class="px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer">
-                  Otomatis
-                </button>
-                <button type="button" id="btn-rate-promo" onclick="setRateMode('promo')"
-                  class="px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
-                  Promo
-                </button>
-                <button type="button" id="btn-rate-manual" onclick="setRateMode('manual')"
-                  class="px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
-                  Manual
-                </button>
-              </div>
-            </div>
-
-            <!-- Mode Otomatis -->
-            <div id="rate-auto-box" class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
-              <div>
-                <p id="auto-promo-label" class="text-xs font-bold text-slate-800">Bunga Reguler Mid-Range (12 Bln)</p>
-                <p class="text-[11px] text-slate-500">Efektif / Anuitas per bulan</p>
-              </div>
-              <div class="text-right">
-                <span id="auto-rate-display" class="text-sm font-extrabold text-blue-600">6,46%</span>
-                <span class="block text-[10px] text-slate-400">/ bulan</span>
-              </div>
-            </div>
-
-            <!-- Mode Promo -->
-            <div id="rate-promo-box" class="hidden space-y-2.5">
-              <div class="space-y-1.5 max-h-64 overflow-y-auto custom-scrollbar pr-1" id="promo-list-container">
-                <!-- Promo 1 -->
-                <button type="button" data-promo="p099" onclick="selectPromo('p099')"
-                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50/70 transition-all cursor-pointer">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs font-extrabold text-blue-700">0,99% flat/bln</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-700">Spesial</span>
-                  </div>
-                  <p class="text-[11px] font-medium text-slate-700 mt-0.5">Cicilan Ringan Spesial</p>
-                </button>
-
-                <!-- Promo 2 -->
-                <button type="button" data-promo="p129" onclick="selectPromo('p129')"
-                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs font-extrabold text-slate-800">1,29% flat/bln</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700">RO Non-Gadget</span>
-                  </div>
-                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Khusus Konsumen RO untuk Non Gadget</p>
-                </button>
-
-                <!-- Promo 3 -->
-                <button type="button" data-promo="p199ro" onclick="selectPromo('p199ro')"
-                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs font-extrabold text-slate-800">1,99% flat/bln</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700">RO Gadget • 6–15 Bln</span>
-                  </div>
-                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Khusus Konsumen RO untuk Gadget (tenor 6, 9, 12, 15 bln)</p>
-                </button>
-
-                <!-- Promo 4 -->
-                <button type="button" data-promo="perafone" onclick="selectPromo('perafone')"
-                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs font-extrabold text-slate-800">1,99% – 2,45% flat/bln</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700">Partner • 6–12 Bln</span>
-                  </div>
-                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Bunga Ringan Erafone, iBox, dan NASA (tenor 6, 9, 12 bln)</p>
-                </button>
-
-                <!-- Promo 5 -->
-                <button type="button" data-promo="p255" onclick="selectPromo('p255')"
-                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs font-extrabold text-slate-800">2,55% flat/bln</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">6–24 Bln</span>
-                  </div>
-                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Program Reguler – Low Interest (tenor 6–24 bln)</p>
-                </button>
-
-                <!-- Promo 6 -->
-                <button type="button" data-promo="plong" onclick="selectPromo('plong')"
-                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs font-extrabold text-slate-800">3,25% / 3,50% / 3,75%</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700">15 / 18 / 24 Bln</span>
-                  </div>
-                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Cicilan Ringan Tenor Panjang (15 bln: 3,25%, 18 bln: 3,50%, 24 bln: 3,75%)</p>
-                </button>
-
-                <!-- Promo 7 -->
-                <button type="button" data-promo="p399" onclick="selectPromo('p399')"
-                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs font-extrabold text-slate-800">3,99% flat/bln</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">18 & 24 Bln</span>
-                  </div>
-                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Program Reguler – Standard untuk tenor 18 & 24 bulan</p>
-                </button>
-
-                <!-- Promo 8 -->
-                <button type="button" data-promo="p469" onclick="selectPromo('p469')"
-                  class="promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-xs font-extrabold text-slate-800">4,69% flat/bln</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700">Free Admin</span>
-                  </div>
-                  <p class="text-[11px] font-medium text-slate-600 mt-0.5">Program Reguler – Free Admin</p>
-                </button>
-              </div>
-
-              <!-- Sub-kontrol khusus Erafone / iBox / NASA -->
-              <div id="promo-erafone-sub" class="hidden bg-amber-50/70 border border-amber-200 rounded-xl p-2.5 space-y-1.5">
-                <div class="flex items-center justify-between">
-                  <span class="text-[11px] font-bold text-amber-900">Pilih Rate Partner (Erafone / iBox / NASA):</span>
-                  <span id="erafone-rate-badge" class="text-xs font-extrabold text-amber-700">2,45% flat</span>
-                </div>
-                <div class="grid grid-cols-3 gap-1.5">
-                  <button type="button" onclick="setErafoneRate(1.99)" id="btn-era-199" class="py-1 text-[11px] font-bold rounded-lg border border-amber-300 bg-white text-amber-800 hover:bg-amber-100 transition-all cursor-pointer">1,99% (6 Bln)</button>
-                  <button type="button" onclick="setErafoneRate(2.25)" id="btn-era-225" class="py-1 text-[11px] font-bold rounded-lg border border-amber-300 bg-white text-amber-800 hover:bg-amber-100 transition-all cursor-pointer">2,25% (9 Bln)</button>
-                  <button type="button" onclick="setErafoneRate(2.45)" id="btn-era-245" class="py-1 text-[11px] font-bold rounded-lg border-2 border-amber-600 bg-amber-600 text-white transition-all cursor-pointer">2,45% (12 Bln)</button>
-                </div>
-              </div>
-
-              <!-- Sub-kontrol khusus Free Admin -->
-              <div id="promo-freeadmin-sub" class="hidden bg-rose-50/70 border border-rose-200 rounded-xl p-2.5 flex items-center justify-between gap-2">
-                <span class="text-[11px] font-semibold text-rose-800">Promo bebas biaya admin:</span>
-                <button type="button" onclick="applyFreeAdmin()" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-sm transition-all cursor-pointer">
-                  Set Admin Rp 0
-                </button>
-              </div>
-
-              <!-- Ringkasan Rate Promo Terpilih -->
-              <div class="bg-blue-50/70 border border-blue-200 rounded-xl px-3 py-2 flex items-center justify-between">
-                <div>
-                  <p id="promo-active-title" class="text-[11px] font-bold text-blue-900">Cicilan Ringan Spesial</p>
-                  <p id="promo-active-note" class="text-[10px] text-blue-700">Flat 0,99%/bln (Setara ~1,79% Efektif/bln)</p>
-                </div>
-                <span id="promo-active-rate" class="text-sm font-extrabold text-blue-700">0,99%</span>
-              </div>
-            </div>
-
-            <!-- Mode Manual -->
-            <div id="rate-manual-box" class="hidden space-y-2">
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button" id="btn-manual-eff" onclick="setManualRateType('effective')"
-                  class="py-1.5 px-2.5 rounded-lg border-2 border-blue-600 bg-blue-50/70 text-blue-700 text-[11px] font-bold transition-all cursor-pointer">
-                  Bunga Efektif (% / Bln)
-                </button>
-                <button type="button" id="btn-manual-flat" onclick="setManualRateType('flat')"
-                  class="py-1.5 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-slate-300 text-[11px] font-bold transition-all cursor-pointer">
-                  Bunga Flat (% / Bln)
-                </button>
-              </div>
-              <div class="relative">
-                <input type="number" id="input-manual-rate" value="3.50" step="0.01" min="0" max="100"
-                  oninput="handleManualRateInput(this)"
-                  class="w-full pl-3.5 pr-16 py-2 text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                  placeholder="0.00" />
-                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-xs font-bold text-slate-400 pointer-events-none">% / bln</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 7. Asuransi Barang (Electronic Protection) -->
-          <div class="pt-1 border-t border-slate-100">
-            <div class="flex items-center justify-between mb-1.5">
-              <label class="block text-xs font-bold text-slate-700">7. Asuransi Barang (Electronic)</label>
-              <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200">
-                <button type="button" id="btn-ins-auto" onclick="setAssetInsMode('auto')"
-                  class="px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer">
-                  Otomatis
-                </button>
-                <button type="button" id="btn-ins-manual" onclick="setAssetInsMode('manual')"
-                  class="px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer">
-                  Manual (Rp)
-                </button>
-              </div>
-            </div>
-
-            <div id="ins-auto-box" class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
-              <div>
-                <p class="text-xs font-bold text-slate-800">Tarif Kategori & Tenor</p>
-                <p id="ins-auto-desc" class="text-[11px] text-slate-500">Estimasi Rate ~10,0% dari OTR</p>
-              </div>
-              <span id="ins-auto-amount" class="text-sm font-extrabold text-slate-800">Rp 600.000</span>
-            </div>
-
-            <div id="ins-manual-box" class="hidden relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-sm font-bold text-slate-400 pointer-events-none">Rp</span>
-              <input type="text" id="input-ins-manual" value="500.000" inputmode="numeric"
-                oninput="handleCurrencyInput(this, 'assetInsManual')"
-                class="w-full pl-10 pr-4 py-2 text-sm font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                placeholder="0" />
-            </div>
-          </div>
-
+    <details class="card fold" open>
+      <summary>
+        <div>
+          <h2>Jadwal angsuran</h2>
+          <small>Porsi pokok, bunga, dan sisa pokok tiap bulan</small>
+        </div>
+      </summary>
+      <div class="fold-body">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Bln</th><th>Angsuran</th><th>Pokok</th><th>Bunga</th><th>Sisa pokok</th></tr></thead>
+            <tbody id="sched-body"></tbody>
+            <tfoot id="sched-foot"></tfoot>
+          </table>
         </div>
       </div>
+    </details>
 
-      <!-- Right Column: Results & Amortization Table (7 cols) -->
-      <div id="pdf-capture-area" class="lg:col-span-7 space-y-5">
+    <p class="hint" style="text-align:center">Hasil simulasi bersifat estimasi dan dapat berbeda dengan ketentuan resmi saat akad.</p>
+  </div>
+</main>
 
-        <!-- PDF Snapshot Header (Hidden on screen, shown during PDF capture) -->
-        <div id="pdf-snapshot-header" class="hidden bg-white rounded-2xl border border-slate-200 p-4 flex items-center justify-between">
-          <div>
-            <h2 class="text-base font-extrabold text-slate-900">RINGKASAN SIMULASI KREDIT & AMORTISASI</h2>
-            <p id="pdf-meta-subtitle" class="text-xs font-semibold text-blue-600 mt-0.5">Kategori: Gadget / HP • Tenor: 12 Bulan</p>
-          </div>
-          <div class="text-right">
-            <p class="text-[11px] font-bold text-slate-500 uppercase">Tanggal Cetak</p>
-            <p id="pdf-timestamp" class="text-xs font-bold text-slate-800">-</p>
-          </div>
-        </div>
+<div class="mbar off" id="mbar">
+  <div><small>Angsuran per bulan</small><b id="mbar-amount">Rp 0</b></div>
+  <button type="button" class="btn primary" id="btn-goto">Lihat hasil</button>
+</div>
 
-        <!-- 3 Highlight Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <!-- Card 1: Angsuran -->
-          <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-4 text-white shadow-md shadow-blue-600/15">
-            <p class="text-xs font-semibold text-blue-100 uppercase tracking-wider">Angsuran / Bulan</p>
-            <p id="res-installment" class="text-2xl font-extrabold mt-1 tracking-tight">Rp 851.000</p>
-            <p id="res-tenor-label" class="text-[11px] text-blue-100 mt-1.5">Tenor 12 Bulan</p>
-          </div>
+<script>
+/* ================= State ================= */
+const DEFAULTS = {
+  category:'gadget', otr:5999000, dp:0, tenor:12,
+  adminType:'rp', adminRp:200000, adminPct:5, adminMode:'upfront',
+  rateMode:'auto', selectedPromo:'p099', erafoneRate:2.45,
+  manualRateType:'effective', manualRateValue:3.5,
+  assetInsMode:'auto', assetInsManual:500000
+};
+const state = { ...DEFAULTS };
+let last = null; // hasil hitung terakhir (dipakai untuk PDF/JPEG)
 
-          <!-- Card 2: Total Bayar Pertama (TDP) -->
-          <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Bayar Pertama (TDP)</p>
-            <p id="res-tdp" class="text-xl font-extrabold text-slate-900 mt-1">Rp 200.000</p>
-            <p id="res-tdp-desc" class="text-[11px] text-slate-500 mt-1.5">DP + Admin Bayar di Awal</p>
-          </div>
+/* ================= Helper ================= */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const formatRp = n => 'Rp ' + fmt(n);
+const pct = (n, d=2) => n.toFixed(d).replace('.', ',');
+const CAT_LABEL = { gadget:'Gadget / HP', elektronik:'Elektronik Rumah' };
 
-          <!-- Card 3: Total Pokok Hutang -->
-          <div class="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-sm">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Pokok Hutang</p>
-            <p id="res-principal" class="text-xl font-extrabold text-slate-900 mt-1">Rp 6.959.000</p>
-            <p id="res-principal-desc" class="text-[11px] text-slate-500 mt-1.5">NTF + Asuransi Jiwa & Barang</p>
-          </div>
-        </div>
+/* ================= Data promo ================= */
+const PROMOS = [
+  { id:'p099',     rate:'0,99% flat/bln',        tag:'Spesial',          desc:'Cicilan Ringan Spesial' },
+  { id:'p129',     rate:'1,29% flat/bln',        tag:'RO Non-Gadget',    desc:'Khusus konsumen RO untuk non gadget', cat:'elektronik' },
+  { id:'p199ro',   rate:'1,99% flat/bln',        tag:'RO Gadget',        desc:'Khusus konsumen RO untuk gadget (tenor 6, 9, 12, 15 bln)', cat:'gadget', tenors:[6,9,12,15] },
+  { id:'perafone', rate:'1,99% - 2,45% flat/bln',tag:'Partner',          desc:'Bunga ringan Erafone, iBox, dan NASA (tenor 6, 9, 12 bln)', cat:'gadget', tenors:[6,9,12] },
+  { id:'p255',     rate:'2,55% flat/bln',        tag:'6 - 24 bln',       desc:'Program Reguler - Low Interest' },
+  { id:'plong',    rate:'3,25% / 3,50% / 3,75%', tag:'15 / 18 / 24 bln', desc:'Tenor panjang: 15 bln 3,25%, 18 bln 3,50%, 24 bln 3,75%', tenors:[15,18,24] },
+  { id:'p399',     rate:'3,99% flat/bln',        tag:'18 & 24 bln',      desc:'Program Reguler - Standard', tenors:[18,24] },
+  { id:'p469',     rate:'4,69% flat/bln',        tag:'Free Admin',       desc:'Program Reguler - Free Admin' }
+];
 
-        <!-- Rincian Struktur Pembiayaan -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5">
-          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 pb-2 border-b border-slate-100">Rincian Struktur Pembiayaan</h3>
+function promoDetails(tenor){
+  switch(state.selectedPromo){
+    case 'p099':     return { flat:0.99, title:'Cicilan Ringan Spesial' };
+    case 'p129':     return { flat:1.29, title:'Khusus Konsumen RO (Non Gadget)' };
+    case 'p199ro':   return { flat:1.99, title:'Khusus Konsumen RO (Gadget)' };
+    case 'perafone': return { flat:state.erafoneRate, title:'Bunga Ringan Erafone, iBox & NASA' };
+    case 'p255':     return { flat:2.55, title:'Program Reguler - Low Interest' };
+    case 'plong':    return { flat: tenor<=15 ? 3.25 : tenor===18 ? 3.50 : 3.75, title:`Cicilan Ringan Tenor Panjang (${tenor} Bln)` };
+    case 'p399':     return { flat:3.99, title:'Program Reguler - Standard' };
+    case 'p469':     return { flat:4.69, title:'Program Reguler - Free Admin' };
+    default:         return { flat:2.55, title:'Program Reguler - Low Interest' };
+  }
+}
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5 text-xs">
-            <div class="flex justify-between py-1 border-b border-slate-50">
-              <span class="text-slate-500">Harga Barang (OTR)</span>
-              <span id="det-otr" class="font-bold text-slate-800">Rp 5.999.000</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-50">
-              <span class="text-slate-500">Asuransi Barang (Electronic)</span>
-              <span id="det-asset-ins" class="font-bold text-slate-800">Rp 600.000</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-50">
-              <span class="text-slate-500">Uang Muka (DP)</span>
-              <span id="det-dp" class="font-bold text-emerald-600">- Rp 0</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-50">
-              <span class="text-slate-500">Biaya Admin (<span id="det-admin-mode-tag">Awal</span>)</span>
-              <span id="det-admin" class="font-bold text-slate-800">Rp 200.000</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-50">
-              <span class="text-slate-500">Pokok Pembiayaan Murni (NTF)</span>
-              <span id="det-ntf" class="font-bold text-slate-800">Rp 5.999.000</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-50">
-              <span class="text-slate-500">Bunga Efektif / Flat</span>
-              <span id="det-rates" class="font-bold text-blue-600">6,46% Eff / 3,90% Flat</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-50">
-              <span class="text-slate-500">Asuransi Jiwa (<span id="det-life-rate">6,0%</span>)</span>
-              <span id="det-life-ins" class="font-bold text-slate-800">Rp 360.000</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-50">
-              <span class="text-slate-500">Total Bunga (<span id="det-tenor-bunga">12</span> Bln)</span>
-              <span id="det-total-interest" class="font-bold text-amber-600">Rp 3.253.000</span>
-            </div>
-          </div>
+function promoIssue(){
+  const p = PROMOS.find(x => x.id === state.selectedPromo);
+  if(!p) return '';
+  if(p.cat && p.cat !== state.category) return `Promo ini khusus kategori ${CAT_LABEL[p.cat]}.`;
+  if(p.tenors && !p.tenors.includes(state.tenor)) return `Promo ini hanya berlaku untuk tenor ${p.tenors.join(', ')} bulan.`;
+  return '';
+}
 
-          <div class="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
-            <span class="font-bold text-slate-700">Total Kewajiban Angsuran (Pokok + Bunga)</span>
-            <span id="det-total-obligation" class="text-sm font-extrabold text-slate-900">Rp 10.212.000</span>
-          </div>
-        </div>
+/* ================= Rumus ================= */
+function detectAutoInterest(cat, otr, dp, tenor){
+  if(cat === 'gadget'){
+    if(tenor === 6 && dp === 0 && otr >= 2500000) return { rate:4.25, label:'Promo Bunga Ringan Tenor 6 Bln (DP 0)' };
+    if(otr >= 6500000 && tenor >= 15)              return { rate:4.32, label:'Tarif Bunga Flagship / Plafon Tinggi' };
+    if(otr >= 3200000 && tenor === 12)             return { rate:6.46, label:'Bunga Reguler Mid-Range (12 Bln)' };
+    return { rate:7.65, label:'Bunga Reguler Standar Gadget' };
+  }
+  if(tenor === 9 && otr >= 8000000)                return { rate:2.26, label:'Promo Bunga Super Ringan (9 Bln)' };
+  if(otr >= 3500000 && tenor >= 12)                return { rate:6.55, label:'Bunga Menengah Home Appliance' };
+  return { rate:7.60, label:'Bunga Reguler Elektronik' };
+}
 
-        <!-- Jadwal Amortisasi Angsuran -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Jadwal Amortisasi Angsuran</h3>
-              <p class="text-[11px] text-slate-500">Simulasi porsi pokok, bunga berjalan, dan sisa kewajiban</p>
-            </div>
-            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">Anuitas / Efektif</span>
-          </div>
+function detectAutoAssetInsurance(cat, otr, tenor){
+  let ratePct;
+  if(cat === 'gadget'){
+    ratePct = tenor<=6 ? 6 : tenor<=9 ? 8 : tenor<=12 ? 10 : tenor<=18 ? 15 : 18;
+  } else {
+    ratePct = tenor<=9 ? 4.5 : tenor<=12 ? 5.5 : tenor<=18 ? 7.5 : 9;
+  }
+  return { ratePct, amount: Math.ceil((otr * ratePct / 100) / 500) * 500 };
+}
 
-          <div id="amortization-scroll-wrapper" class="overflow-x-auto custom-scrollbar max-h-[420px]">
-            <table class="w-full text-left border-collapse">
-              <thead class="bg-slate-50 sticky top-0 z-10 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase">
-                <tr>
-                  <th class="py-3 px-4 text-center">Bln</th>
-                  <th class="py-3 px-4 text-right">Angsuran</th>
-                  <th class="py-3 px-4 text-right">Porsi Pokok</th>
-                  <th class="py-3 px-4 text-right">Porsi Bunga</th>
-                  <th class="py-3 px-4 text-right">Sisa Pokok</th>
-                </tr>
-              </thead>
-              <tbody id="amortization-tbody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
-                <!-- Rows generated by JS -->
-              </tbody>
-              <tfoot id="amortization-tfoot" class="bg-slate-50 border-t-2 border-slate-200 text-xs font-extrabold text-slate-900">
-                <!-- Total generated by JS -->
-              </tfoot>
-            </table>
-          </div>
-        </div>
+// Cari bunga efektif bulanan dari rasio angsuran/pokok (Newton-Raphson)
+function solveRate(pmtRatio, tenor, start){
+  let r = start;
+  for(let i=0; i<60; i++){
+    const pow = Math.pow(1 + r, -tenor);
+    const fn  = (r / (1 - pow)) - pmtRatio;
+    const dfn = ((1 - pow) - r * tenor * Math.pow(1 + r, -tenor - 1)) / Math.pow(1 - pow, 2);
+    const next = r - fn / dfn;
+    if(Math.abs(next - r) < 1e-10){ r = next; break; }
+    r = next;
+  }
+  return r;
+}
 
-      </div>
-    </div>
-  </main>
+function flatToEffectiveMonthly(flatPct, tenor){
+  const f = flatPct / 100;
+  if(f <= 0) return 0;
+  return solveRate((1 + f * tenor) / tenor, tenor, f * 1.8) * 100;
+}
 
-  <script>
-    // State Aplikasi
-    const state = {
-      category: 'gadget',          // 'gadget' | 'elektronik'
-      otr: 5999000,
-      dp: 0,
-      tenor: 12,
-      adminType: 'rp',             // 'rp' | 'pct'
-      adminRp: 200000,
-      adminPct: 5,
-      adminMode: 'upfront',        // 'upfront' | 'loan'
-      rateMode: 'auto',            // 'auto' | 'promo' | 'manual'
-      selectedPromo: 'p099',
-      erafoneRate: 2.45,
-      manualRateType: 'effective', // 'effective' | 'flat'
-      manualRateValue: 3.50,
-      assetInsMode: 'auto',        // 'auto' | 'manual'
-      assetInsManual: 500000
+function buildSchedule(principal, installment, tenor){
+  if(principal <= 0 || installment <= 0) return { rows:[], sumP:0, sumI:0 };
+  let actualR = 0;
+  const ratio = installment / principal;
+  if(ratio > 1 / tenor) actualR = Math.max(0, solveRate(ratio, tenor, 0.05));
+
+  let remain = principal, sumP = 0, sumI = 0;
+  const rows = [];
+  for(let m=1; m<=tenor; m++){
+    let interest, prin;
+    if(m < tenor){
+      interest = Math.round(remain * actualR);
+      prin = installment - interest;
+      if(prin > remain){ prin = remain; interest = installment - prin; }
+      remain -= prin;
+    } else {
+      prin = remain;
+      interest = Math.max(0, installment - prin);
+      remain = 0;
+    }
+    sumP += prin; sumI += interest;
+    rows.push({ m, installment, prin, interest, remain });
+  }
+  return { rows, sumP, sumI };
+}
+
+/* ================= Hitung utama ================= */
+function calculate(){
+  const otr = Math.max(0, state.otr);
+  const dp  = Math.min(otr, Math.max(0, state.dp));
+  const ntf = Math.max(0, otr - dp);
+  const tenor = state.tenor;
+  const dpPct = otr > 0 ? Math.round(dp / otr * 1000) / 10 : 0;
+
+  // Asuransi jiwa: 0,5% x tenor x NTF, dibulatkan ke atas kelipatan 500
+  const lifeRatePct = 0.5 * tenor;
+  const lifeIns = ntf > 0 ? Math.ceil((ntf * lifeRatePct / 100) / 500) * 500 : 0;
+
+  // Asuransi barang
+  const autoIns = detectAutoAssetInsurance(state.category, otr, tenor);
+  const assetIns = state.assetInsMode === 'auto'
+    ? (otr > 0 ? autoIns.amount : 0)
+    : Math.max(0, state.assetInsManual);
+
+  // Admin
+  const adminFee = state.adminType === 'rp'
+    ? Math.max(0, state.adminRp)
+    : Math.round(ntf * state.adminPct / 100);
+
+  const adminLoan = state.adminMode === 'loan' ? adminFee : 0;
+  const adminUp   = state.adminMode === 'upfront' ? adminFee : 0;
+  const totalPrincipal = ntf + lifeIns + assetIns + adminLoan;
+  const tdp = dp + adminUp;
+
+  // Bunga
+  let effPct = 0, rateLabel = '';
+  if(state.rateMode === 'auto'){
+    const a = detectAutoInterest(state.category, otr, dp, tenor);
+    effPct = a.rate;
+    rateLabel = `Otomatis - ${a.label}`;
+  } else if(state.rateMode === 'promo'){
+    const p = promoDetails(tenor);
+    effPct = flatToEffectiveMonthly(p.flat, tenor);
+    rateLabel = `Promo - ${p.title} (flat ${pct(p.flat)}%/bln)`;
+  } else if(state.manualRateType === 'effective'){
+    effPct = state.manualRateValue;
+    rateLabel = `Manual - efektif ${pct(state.manualRateValue)}%/bln`;
+  } else {
+    effPct = flatToEffectiveMonthly(state.manualRateValue, tenor);
+    rateLabel = `Manual - flat ${pct(state.manualRateValue)}%/bln`;
+  }
+
+  // Angsuran anuitas, dibulatkan ke atas kelipatan Rp 1.000
+  const r = effPct / 100;
+  let raw = 0;
+  if(totalPrincipal > 0) raw = r > 0 ? (totalPrincipal * r) / (1 - Math.pow(1 + r, -tenor)) : totalPrincipal / tenor;
+  const installment = totalPrincipal > 0 ? Math.ceil(raw / 1000) * 1000 : 0;
+  const totalObligation = installment * tenor;
+  const totalInterest = Math.max(0, totalObligation - totalPrincipal);
+  const flatPct = (totalPrincipal > 0 && tenor > 0) ? (totalInterest / totalPrincipal) / tenor * 100 : 0;
+
+  const sched = buildSchedule(totalPrincipal, installment, tenor);
+
+  // Rincian (dipakai layar, PDF, dan JPEG)
+  const adminModeText = state.adminMode === 'upfront' ? 'dibayar di awal' : 'masuk pokok';
+  const breakdown = [
+    { l:'Harga barang (OTR)', v:formatRp(otr) },
+    { l:'Uang muka (DP)', v:'- ' + formatRp(dp) },
+    { l:'Pokok pembiayaan (NTF)', v:formatRp(ntf), k:'sub' },
+    { l:`Asuransi jiwa (${pct(lifeRatePct,1)}%)`, v:'+ ' + formatRp(lifeIns) },
+    { l:'Asuransi barang', v:'+ ' + formatRp(assetIns) },
+    state.adminMode === 'loan'
+      ? { l:'Biaya admin (masuk pokok)', v:'+ ' + formatRp(adminFee) }
+      : { l:'Biaya admin (dibayar di awal, tidak masuk pokok)', v:formatRp(adminFee) },
+    { l:'Total pokok hutang', v:formatRp(totalPrincipal), k:'sub' },
+    { l:'Suku bunga per bulan', v:`${pct(effPct)}% efektif | ${pct(flatPct)}% flat` },
+    { l:`Total bunga (${tenor} bulan)`, v:formatRp(totalInterest) },
+    { l:'Total kewajiban angsuran (pokok + bunga)', v:formatRp(totalObligation), k:'total' }
+  ];
+
+  last = {
+    catDisplay: CAT_LABEL[state.category], tenor, otr, dp, dpPctText: pct(dpPct,1).replace(',0',''),
+    adminFee, adminModeText, rateLabel, installment, tdp, totalPrincipal,
+    tdpNote: state.adminMode === 'upfront' ? 'DP + admin dibayar di awal' : 'DP saja (admin masuk pokok)',
+    principalNote: state.adminMode === 'loan' ? 'NTF + asuransi + admin' : 'NTF + asuransi jiwa & barang',
+    breakdown, sched, totalObligation
+  };
+
+  render({ dpPct, autoIns, assetIns, adminFee, effPct, rateLabel, tenor, ntf });
+}
+
+/* ================= Tampilkan ke layar ================= */
+function render(x){
+  const d = last;
+  $('#dp-badge').textContent = pct(x.dpPct,1).replace(',0','') + '%';
+
+  $('#res-installment').textContent = formatRp(d.installment);
+  $('#res-tenor').textContent = `selama ${x.tenor} bulan`;
+  $('#res-tdp').textContent = formatRp(d.tdp);
+  $('#res-tdp-note').textContent = d.tdpNote;
+  $('#res-principal').textContent = formatRp(d.totalPrincipal);
+  $('#res-principal-note').textContent = d.principalNote;
+  $('#mbar-amount').textContent = formatRp(d.installment);
+
+  // Panel bunga
+  if(state.rateMode === 'auto'){
+    const a = detectAutoInterest(state.category, state.otr, Math.min(state.otr, state.dp), x.tenor);
+    $('#auto-label').textContent = a.label;
+    $('#auto-rate').textContent = pct(a.rate) + '%';
+  } else if(state.rateMode === 'promo'){
+    const p = promoDetails(x.tenor);
+    $('#promo-title').textContent = p.title;
+    $('#promo-rate').textContent = pct(p.flat) + '%';
+    $('#promo-note').textContent = `Flat ${pct(p.flat)}%/bln, setara ${pct(x.effPct)}% efektif/bln`;
+    $('#era-badge').textContent = pct(state.erafoneRate) + '% flat';
+    const issue = promoIssue();
+    const w = $('#promo-warn');
+    w.hidden = !issue;
+    w.textContent = issue;
+  }
+
+  // Asuransi & admin
+  $('#ins-auto-desc').textContent = `Estimasi ~${pct(x.autoIns.ratePct,1)}% dari OTR`;
+  $('#ins-auto-amount').textContent = formatRp(state.otr > 0 ? x.autoIns.amount : 0);
+  if(state.adminType === 'pct') $('#admin-pct-preview').textContent = '= ' + formatRp(x.adminFee);
+  $('#extra-summary').textContent =
+    `Admin ${formatRp(x.adminFee)} (${d.adminModeText}) | Asuransi barang ${formatRp(x.assetIns)}`;
+
+  // Rincian
+  $('#breakdown').innerHTML = d.breakdown.map(r =>
+    `<div class="row${r.k ? ' ' + r.k : ''}"><span>${r.l}</span><b>${r.v}</b></div>`).join('');
+
+  // Jadwal
+  const body = $('#sched-body'), foot = $('#sched-foot');
+  if(!d.sched.rows.length){
+    body.innerHTML = `<tr><td colspan="5" class="empty">Isi harga barang untuk melihat jadwal angsuran.</td></tr>`;
+    foot.innerHTML = '';
+  } else {
+    body.innerHTML = d.sched.rows.map(r =>
+      `<tr><td>${r.m}</td><td><b>${fmt(r.installment)}</b></td><td>${fmt(r.prin)}</td><td>${fmt(r.interest)}</td><td>${fmt(r.remain)}</td></tr>`).join('');
+    foot.innerHTML =
+      `<tr><td>Total</td><td>${fmt(d.totalObligation)}</td><td>${fmt(d.sched.sumP)}</td><td>${fmt(d.sched.sumI)}</td><td>0</td></tr>`;
+  }
+
+  const ok = d.installment > 0;
+  $('#btn-pdf').disabled = !ok;
+  $('#btn-jpg').disabled = !ok;
+}
+
+/* ================= Sinkron tampilan tombol ================= */
+function syncUI(){
+  $$('[data-key]').forEach(b => {
+    const k = b.dataset.key, v = b.dataset.val;
+    let on;
+    if(k === 'dpPct') on = state.otr > 0 && state.dp === Math.round(state.otr * v / 100);
+    else on = String(state[k]) === v;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
+  });
+  $$('[data-when]').forEach(p => {
+    const [k, v] = p.dataset.when.split('=');
+    p.hidden = String(state[k]) !== v;
+  });
+}
+function refresh(){ calculate(); syncUI(); }
+
+/* ================= Aksi ================= */
+function setCategory(v){ state.category = v; refresh(); }
+function setTenor(t){
+  state.tenor = t;
+  if(state.selectedPromo === 'perafone'){
+    if(t === 6) state.erafoneRate = 1.99;
+    else if(t === 9) state.erafoneRate = 2.25;
+    else if(t === 12) state.erafoneRate = 2.45;
+  }
+  refresh();
+}
+function setDpPercent(p){
+  state.dp = Math.round(state.otr * p / 100);
+  $('#input-dp').value = fmt(state.dp);
+  refresh();
+}
+function setAdminType(v){ state.adminType = v; refresh(); }
+function setAdminMode(v){ state.adminMode = v; refresh(); }
+function setRateMode(v){ state.rateMode = v; refresh(); }
+function setManualRateType(v){ state.manualRateType = v; refresh(); }
+function setAssetInsMode(v){ state.assetInsMode = v; refresh(); }
+
+function selectPromo(id){
+  state.selectedPromo = id;
+  // Sesuaikan kategori & tenor agar sesuai syarat promo
+  if(id === 'p129' && state.category === 'gadget') state.category = 'elektronik';
+  else if(id === 'p199ro'){
+    state.category = 'gadget';
+    if(![6,9,12,15].includes(state.tenor)) state.tenor = 12;
+  } else if(id === 'perafone'){
+    state.category = 'gadget';
+    if(![6,9,12].includes(state.tenor)) state.tenor = 12;
+    state.erafoneRate = state.tenor === 6 ? 1.99 : state.tenor === 9 ? 2.25 : 2.45;
+  } else if(id === 'plong'){
+    if(![15,18,24].includes(state.tenor)) state.tenor = 18;
+  } else if(id === 'p399'){
+    if(![18,24].includes(state.tenor)) state.tenor = 18;
+  }
+  refresh();
+}
+function setErafoneRate(v){
+  state.erafoneRate = v;
+  state.tenor = v === 1.99 ? 6 : v === 2.25 ? 9 : 12;
+  refresh();
+}
+function applyFreeAdmin(){
+  state.adminType = 'rp';
+  state.adminRp = 0;
+  $('#input-admin-rp').value = '0';
+  refresh();
+}
+
+const actions = {
+  category:setCategory, tenor:v => setTenor(+v), dpPct:v => setDpPercent(+v),
+  adminType:setAdminType, adminMode:setAdminMode, rateMode:setRateMode,
+  selectedPromo:selectPromo, erafoneRate:v => setErafoneRate(+v),
+  manualRateType:setManualRateType, assetInsMode:setAssetInsMode
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest('button[data-key]');
+  if(b && actions[b.dataset.key]) actions[b.dataset.key](b.dataset.val);
+});
+
+/* ================= Input ================= */
+function onMoney(el, key){
+  const raw = el.value;
+  const caret = el.selectionStart == null ? raw.length : el.selectionStart;
+  const before = raw.slice(0, caret).replace(/\D/g, '').length;
+  const digits = raw.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 11);
+  const n = digits ? parseInt(digits, 10) : 0;
+  state[key] = n;
+  el.value = digits ? fmt(n) : '';
+  let pos = 0, seen = 0;
+  while(pos < el.value.length && seen < before){ if(/\d/.test(el.value[pos])) seen++; pos++; }
+  try{ el.setSelectionRange(pos, pos); }catch(e){}
+  if(key === 'otr' && state.dp > n){ state.dp = n; $('#input-dp').value = fmt(n); }
+  refresh();
+}
+function onManualRate(el){
+  const v = parseFloat(el.value);
+  state.manualRateValue = isNaN(v) ? 0 : Math.max(0, v);
+  refresh();
+}
+function onAdminPct(el){
+  const v = parseFloat(el.value);
+  state.adminPct = isNaN(v) ? 0 : Math.max(0, v);
+  refresh();
+}
+
+function fillInputs(){
+  $('#input-otr').value = fmt(state.otr);
+  $('#input-dp').value = fmt(state.dp);
+  $('#input-admin-rp').value = fmt(state.adminRp);
+  $('#input-admin-pct').value = state.adminPct;
+  $('#input-manual-rate').value = state.manualRateValue;
+  $('#input-ins-manual').value = fmt(state.assetInsManual);
+}
+function resetForm(){
+  Object.assign(state, DEFAULTS);
+  fillInputs();
+  refresh();
+}
+
+/* ================= Ekspor: util ================= */
+const stamp = () => new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }) + ' WIB';
+const baseName = () => `Simulasi-Kredit-${state.category === 'gadget' ? 'Gadget' : 'Elektronik'}-${state.tenor}Bln`;
+const DISCLAIMER = 'Hasil simulasi bersifat estimasi dan dapat berbeda dengan ketentuan resmi saat akad.';
+
+function toast(msg){
+  let t = $('#toast');
+  if(!t){ t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { t.hidden = true; }, 4000);
+}
+function busy(btn, on, text){
+  if(on){ btn.dataset.t = btn.textContent; btn.textContent = text; btn.disabled = true; }
+  else { btn.textContent = btn.dataset.t; btn.disabled = !(last && last.installment > 0); }
+}
+function loadScript(src){
+  return new Promise((res, rej) => {
+    if($(`script[src="${src}"]`)) return res();
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = () => rej(new Error('gagal memuat ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+/* ================= Ekspor: PDF ================= */
+async function downloadPDF(){
+  const btn = $('#btn-pdf');
+  if(!last || !last.installment) return;
+  busy(btn, true, 'Membuat PDF...');
+  try{
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+
+    const d = last;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'mm', format:'a4' });
+    const W = 210, M = 14, CW = W - 2 * M, PAGE_BOTTOM = 297 - 18;
+    const gray = [107,114,128], dark = [17,24,39], blue = [37,99,235], soft = [239,246,255];
+
+    // Kop
+    doc.setFillColor(...blue); doc.rect(0, 0, W, 26, 'F');
+    doc.setTextColor(255); doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
+    doc.text('Simulasi Kredit & Amortisasi', M, 12);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
+    doc.text(`${d.catDisplay}  |  Tenor ${d.tenor} bulan`, M, 20);
+    doc.text(`Dicetak: ${stamp()}`, W - M, 20, { align:'right' });
+
+    // Tiga kotak ringkasan
+    let y = 34;
+    const bw = (CW - 8) / 3, bh = 25;
+    [
+      ['Angsuran per bulan', formatRp(d.installment), `selama ${d.tenor} bulan`, true],
+      ['Bayar pertama (TDP)', formatRp(d.tdp), d.tdpNote, false],
+      ['Total pokok hutang', formatRp(d.totalPrincipal), d.principalNote, false]
+    ].forEach((b, i) => {
+      const x = M + i * (bw + 4);
+      doc.setFillColor(...(b[3] ? soft : [255,255,255]));
+      doc.setDrawColor(...(b[3] ? [147,197,253] : [229,231,235]));
+      doc.roundedRect(x, y, bw, bh, 2, 2, 'FD');
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...gray);
+      doc.text(b[0], x + 4, y + 6.5);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(b[3] ? 14 : 12); doc.setTextColor(...(b[3] ? [29,78,216] : dark));
+      doc.text(b[1], x + 4, y + 14.5);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...gray);
+      doc.text(b[2], x + 4, y + 20.5, { maxWidth: bw - 8 });
+    });
+    y += bh + 10;
+
+    const section = (title) => {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...dark);
+      doc.text(title, M, y);
+      doc.setDrawColor(229,231,235); doc.line(M, y + 2, M + CW, y + 2);
+      y += 5;
+    };
+    const tableBase = {
+      theme:'grid', margin:{ left:M, right:M, top:16, bottom:18 },
+      styles:{ font:'helvetica', fontSize:9.5, cellPadding:{ top:2, bottom:2, left:2.5, right:2.5 }, textColor:[31,41,55], lineColor:[229,231,235], lineWidth:0.1 }
     };
 
-    // Format Angka Rupiah
-    // Set Rate Mode (Auto vs Promo vs Manual)
-    function setRateMode(mode) {
-      state.rateMode = mode;
-      const btnAuto = document.getElementById('btn-rate-auto');
-      const btnPromo = document.getElementById('btn-rate-promo');
-      const btnMan = document.getElementById('btn-rate-manual');
-      const boxAuto = document.getElementById('rate-auto-box');
-      const boxPromo = document.getElementById('rate-promo-box');
-      const boxMan = document.getElementById('rate-manual-box');
+    // Parameter
+    section('Parameter simulasi');
+    const label = { textColor:gray }, val = { fontStyle:'bold' };
+    doc.autoTable({
+      ...tableBase, startY:y,
+      body:[
+        [{content:'Kategori',styles:label},{content:d.catDisplay,styles:val},{content:'Harga barang (OTR)',styles:label},{content:formatRp(d.otr),styles:val}],
+        [{content:'Tenor',styles:label},{content:`${d.tenor} bulan`,styles:val},{content:'Uang muka (DP)',styles:label},{content:`${formatRp(d.dp)} (${d.dpPctText}%)`,styles:val}],
+        [{content:'Skema bunga',styles:label},{content:d.rateLabel,styles:val},{content:'Biaya admin',styles:label},{content:`${formatRp(d.adminFee)} (${d.adminModeText})`,styles:val}]
+      ],
+      columnStyles:{ 0:{cellWidth:26}, 1:{cellWidth:65}, 2:{cellWidth:34}, 3:{cellWidth:57} }
+    });
+    y = doc.lastAutoTable.finalY + 9;
 
-      const activeCls = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer';
-      const inactiveCls = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer';
+    // Rincian
+    section('Rincian pembiayaan');
+    doc.autoTable({
+      ...tableBase, startY:y,
+      body: d.breakdown.map(r => {
+        const st = r.k === 'total' ? { fillColor:soft, fontStyle:'bold', textColor:[29,78,216] }
+                 : r.k === 'sub'   ? { fillColor:[249,250,251], fontStyle:'bold' } : {};
+        return [{ content:r.l, styles:st }, { content:r.v, styles:{ halign:'right', fontStyle:'bold', ...st } }];
+      }),
+      columnStyles:{ 0:{cellWidth:112}, 1:{cellWidth:70} }
+    });
+    y = doc.lastAutoTable.finalY + 9;
 
-      btnAuto.className = mode === 'auto' ? activeCls : inactiveCls;
-      btnPromo.className = mode === 'promo' ? activeCls : inactiveCls;
-      btnMan.className = mode === 'manual' ? activeCls : inactiveCls;
-
-      boxAuto.classList.toggle('hidden', mode !== 'auto');
-      boxPromo.classList.toggle('hidden', mode !== 'promo');
-      boxMan.classList.toggle('hidden', mode !== 'manual');
-
-      if (mode === 'promo') {
-        updatePromoUI();
-      }
-      calculate();
-    }
-
-    // Pilih Program Promo
-    function selectPromo(promoId) {
-      state.selectedPromo = promoId;
-
-      // Penyesuaian kategori & tenor otomatis sesuai syarat masing-masing promo
-      if (promoId === 'p129' && state.category === 'gadget') {
-        setCategory('elektronik');
-      } else if (promoId === 'p199ro') {
-        if (state.category !== 'gadget') setCategory('gadget');
-        if (![6, 9, 12, 15].includes(state.tenor)) setTenor(12);
-      } else if (promoId === 'perafone') {
-        if (state.category !== 'gadget') setCategory('gadget');
-        if (![6, 9, 12].includes(state.tenor)) setTenor(12);
-        if (state.tenor === 6) state.erafoneRate = 1.99;
-        else if (state.tenor === 9) state.erafoneRate = 2.25;
-        else state.erafoneRate = 2.45;
-      } else if (promoId === 'plong') {
-        if (![15, 18, 24].includes(state.tenor)) setTenor(18);
-      } else if (promoId === 'p399') {
-        if (![18, 24].includes(state.tenor)) setTenor(18);
-      }
-
-      updatePromoUI();
-      calculate();
-    }
-
-    function setErafoneRate(rateVal) {
-      state.erafoneRate = rateVal;
-      if (rateVal === 1.99 && state.tenor !== 6) setTenor(6);
-      else if (rateVal === 2.25 && state.tenor !== 9) setTenor(9);
-      else if (rateVal === 2.45 && state.tenor !== 12) setTenor(12);
-      updatePromoUI();
-      calculate();
-    }
-
-    function applyFreeAdmin() {
-      state.adminType = 'rp';
-      state.adminRp = 0;
-      document.getElementById('input-admin-rp').value = '0';
-      setAdminType('rp');
-    }
-
-    function updatePromoUI() {
-      document.querySelectorAll('.promo-option-btn').forEach(btn => {
-        const id = btn.getAttribute('data-promo');
-        if (id === state.selectedPromo) {
-          btn.className = 'promo-option-btn w-full text-left p-2.5 rounded-xl border-2 border-blue-600 bg-blue-50/70 transition-all cursor-pointer';
-          btn.querySelector('span').classList.remove('text-slate-800');
-          btn.querySelector('span').classList.add('text-blue-700');
-        } else {
-          btn.className = 'promo-option-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-all cursor-pointer';
-          btn.querySelector('span').classList.remove('text-blue-700');
-          btn.querySelector('span').classList.add('text-slate-800');
-        }
-      });
-
-      const eraBox = document.getElementById('promo-erafone-sub');
-      const freeAdminBox = document.getElementById('promo-freeadmin-sub');
-      eraBox.classList.toggle('hidden', state.selectedPromo !== 'perafone');
-      freeAdminBox.classList.toggle('hidden', state.selectedPromo !== 'p469');
-
-      if (state.selectedPromo === 'perafone') {
-        document.getElementById('erafone-rate-badge').textContent = state.erafoneRate.toFixed(2).replace('.', ',') + '% flat';
-        [199, 225, 245].forEach(code => {
-          const val = code / 100;
-          const btn = document.getElementById('btn-era-' + code);
-          if (Math.abs(state.erafoneRate - val) < 0.001) {
-            btn.className = 'py-1 text-[11px] font-bold rounded-lg border-2 border-amber-600 bg-amber-600 text-white transition-all cursor-pointer';
-          } else {
-            btn.className = 'py-1 text-[11px] font-bold rounded-lg border border-amber-300 bg-white text-amber-800 hover:bg-amber-100 transition-all cursor-pointer';
-          }
-        });
-      }
-    }
-
-    function getSelectedPromoDetails(tenor) {
-      switch (state.selectedPromo) {
-        case 'p099':
-          return { flatRate: 0.99, title: 'Cicilan Ringan Spesial' };
-        case 'p129':
-          return { flatRate: 1.29, title: 'Khusus Konsumen RO (Non Gadget)' };
-        case 'p199ro':
-          return { flatRate: 1.99, title: 'Khusus Konsumen RO (Gadget)' };
-        case 'perafone':
-          return { flatRate: state.erafoneRate, title: 'Bunga Ringan Erafone, iBox & NASA' };
-        case 'p255':
-          return { flatRate: 2.55, title: 'Program Reguler – Low Interest' };
-        case 'plong': {
-          let r = 3.50;
-          if (tenor <= 15) r = 3.25;
-          else if (tenor === 18) r = 3.50;
-          else r = 3.75;
-          return { flatRate: r, title: `Cicilan Ringan Tenor Panjang (${tenor} Bln)` };
-        }
-        case 'p399':
-          return { flatRate: 3.99, title: 'Program Reguler – Standard (18 & 24 Bln)' };
-        case 'p469':
-          return { flatRate: 4.69, title: 'Program Reguler – Free Admin' };
-        default:
-          return { flatRate: 2.55, title: 'Program Reguler – Low Interest' };
-      }
-    }
-
-    function setManualRateType(type) {
-      state.manualRateType = type;
-      const btnEff = document.getElementById('btn-manual-eff');
-      const btnFlat = document.getElementById('btn-manual-flat');
-
-      if (type === 'effective') {
-        btnEff.className = 'py-1.5 px-2.5 rounded-lg border-2 border-blue-600 bg-blue-50/70 text-blue-700 text-[11px] font-bold transition-all cursor-pointer';
-        btnFlat.className = 'py-1.5 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-slate-300 text-[11px] font-bold transition-all cursor-pointer';
-      } else {
-        btnFlat.className = 'py-1.5 px-2.5 rounded-lg border-2 border-blue-600 bg-blue-50/70 text-blue-700 text-[11px] font-bold transition-all cursor-pointer';
-        btnEff.className = 'py-1.5 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-slate-300 text-[11px] font-bold transition-all cursor-pointer';
-      }
-      calculate();
-    }
-
-    function handleManualRateInput(el) {
-      const val = parseFloat(el.value);
-      state.manualRateValue = isNaN(val) ? 0 : Math.max(0, val);
-      calculate();
-    }
-
-    // Set Asset Insurance Mode
-    function setAssetInsMode(mode) {
-      state.assetInsMode = mode;
-      const btnAuto = document.getElementById('btn-ins-auto');
-      const btnMan = document.getElementById('btn-ins-manual');
-      const boxAuto = document.getElementById('ins-auto-box');
-      const boxMan = document.getElementById('ins-manual-box');
-
-      if (mode === 'auto') {
-        btnAuto.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer';
-        btnMan.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer';
-        boxAuto.classList.remove('hidden');
-        boxMan.classList.add('hidden');
-      } else {
-        btnMan.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md bg-white text-blue-700 shadow-sm transition-all cursor-pointer';
-        btnAuto.className = 'px-2.5 py-0.5 text-[11px] font-bold rounded-md text-slate-600 hover:text-slate-900 transition-all cursor-pointer';
-        boxMan.classList.remove('hidden');
-        boxAuto.classList.add('hidden');
-      }
-      calculate();
-    }
-
-    // Deteksi Bunga Efektif Otomatis berdasarkan Pola Empiris Kontrak
-    function detectAutoInterest(cat, otr, dp, tenor) {
-      if (cat === 'gadget') {
-        if (tenor === 6 && dp === 0 && otr >= 2500000) {
-          return { rate: 4.25, label: 'Promo Bunga Ringan Tenor 6 Bln (DP 0)' };
-        }
-        if (otr >= 6500000 && tenor >= 15) {
-          return { rate: 4.32, label: 'Tarif Bunga Flagship / Plafon Tinggi' };
-        }
-        if (otr >= 3200000 && tenor === 12) {
-          return { rate: 6.46, label: 'Bunga Reguler Mid-Range (12 Bln)' };
-        }
-        return { rate: 7.65, label: 'Bunga Reguler Standar Gadget' };
-      } else {
-        if (tenor === 9 && otr >= 8000000) {
-          return { rate: 2.26, label: 'Promo Bunga Super Ringan (9 Bln)' };
-        }
-        if (otr >= 3500000 && tenor >= 12) {
-          return { rate: 6.55, label: 'Bunga Menengah Home Appliance' };
-        }
-        return { rate: 7.60, label: 'Bunga Reguler Elektronik' };
-      }
-    }
-
-    // Deteksi Asuransi Barang Otomatis
-    function detectAutoAssetInsurance(cat, otr, tenor) {
-      let ratePct = 0;
-      if (cat === 'gadget') {
-        if (tenor <= 6) ratePct = 6.0;
-        else if (tenor <= 9) ratePct = 8.0;
-        else if (tenor <= 12) ratePct = 10.0;
-        else if (tenor <= 18) ratePct = 15.0;
-        else ratePct = 18.0;
-      } else {
-        if (tenor <= 9) ratePct = 4.5;
-        else if (tenor <= 12) ratePct = 5.5;
-        else if (tenor <= 18) ratePct = 7.5;
-        else ratePct = 9.0;
-      }
-      const amount = Math.ceil((otr * ratePct / 100) / 500) * 500;
-      return { ratePct, amount };
-    }
-
-    // Konversi Flat ke Efektif Bulanan (Newton-Raphson)
-    function flatToEffectiveMonthly(flatMonthlyPct, tenor) {
-      const f = flatMonthlyPct / 100;
-      if (f <= 0) return 0;
-      const pmtRatio = (1 + f * tenor) / tenor;
-      let r = f * 1.8;
-      for (let i = 0; i < 60; i++) {
-        const pow = Math.pow(1 + r, -tenor);
-        const fn = (r / (1 - pow)) - pmtRatio;
-        const dfn = ((1 - pow) - r * tenor * Math.pow(1 + r, -tenor - 1)) / Math.pow(1 - pow, 2);
-        const nextR = r - fn / dfn;
-        if (Math.abs(nextR - r) < 1e-9) {
-          r = nextR;
-          break;
-        }
-        r = nextR;
-      }
-      return r * 100;
-    }
-
-    // Kalkulasi Utama
-    function calculate() {
-      const otr = Math.max(0, state.otr);
-      const dp = Math.min(otr, Math.max(0, state.dp));
-      const ntf = Math.max(0, otr - dp);
-      const tenor = state.tenor;
-
-      // Update badge % DP
-      const dpPct = otr > 0 ? ((dp / otr) * 100).toFixed(1).replace('.0', '') : 0;
-      document.getElementById('dp-percent-badge').textContent = dpPct + '%';
-
-      // 1. Asuransi Jiwa (0.5% * Tenor * NTF, dibulatkan ke atas kelipatan 500)
-      const lifeRatePct = 0.5 * tenor;
-      const lifeIns = ntf > 0 ? Math.ceil((ntf * (lifeRatePct / 100)) / 500) * 500 : 0;
-
-      // 2. Asuransi Barang
-      let assetIns = 0;
-      if (state.assetInsMode === 'auto') {
-        const autoIns = detectAutoAssetInsurance(state.category, otr, tenor);
-        assetIns = otr > 0 ? autoIns.amount : 0;
-        document.getElementById('ins-auto-desc').textContent = `Estimasi Rate ~${autoIns.ratePct.toFixed(1).replace('.', ',')}% dari OTR`;
-        document.getElementById('ins-auto-amount').textContent = formatRp(assetIns);
-      } else {
-        assetIns = Math.max(0, state.assetInsManual);
-      }
-
-      // 3. Biaya Admin (Rp atau %)
-      let adminFee = 0;
-      if (state.adminType === 'rp') {
-        adminFee = Math.max(0, state.adminRp);
-      } else {
-        adminFee = Math.round((ntf * state.adminPct) / 100);
-        document.getElementById('admin-pct-preview').textContent = '= ' + formatRp(adminFee);
-      }
-
-      // 4. Total Pokok Hutang & TDP
-      const adminInLoan = state.adminMode === 'loan' ? adminFee : 0;
-      const adminUpfront = state.adminMode === 'upfront' ? adminFee : 0;
-
-      const totalPrincipal = ntf + lifeIns + assetIns + adminInLoan;
-      const tdp = dp + adminUpfront;
-
-      // 5. Suku Bunga
-      let effMonthlyPct = 0;
-      if (state.rateMode === 'auto') {
-        const autoRate = detectAutoInterest(state.category, otr, dp, tenor);
-        effMonthlyPct = autoRate.rate;
-        document.getElementById('auto-promo-label').textContent = autoRate.label;
-        document.getElementById('auto-rate-display').textContent = effMonthlyPct.toFixed(2).replace('.', ',') + '%';
-      } else if (state.rateMode === 'promo') {
-        const promoInfo = getSelectedPromoDetails(tenor);
-        effMonthlyPct = flatToEffectiveMonthly(promoInfo.flatRate, tenor);
-        document.getElementById('promo-active-title').textContent = promoInfo.title;
-        document.getElementById('promo-active-rate').textContent = promoInfo.flatRate.toFixed(2).replace('.', ',') + '%';
-        document.getElementById('promo-active-note').textContent =
-          `Flat ${promoInfo.flatRate.toFixed(2).replace('.', ',')}%/bln (Setara ~${effMonthlyPct.toFixed(2).replace('.', ',')}% Efektif/bln)`;
-      } else {
-        if (state.manualRateType === 'effective') {
-          effMonthlyPct = state.manualRateValue;
-        } else {
-          effMonthlyPct = flatToEffectiveMonthly(state.manualRateValue, tenor);
+    // Jadwal: pindah halaman baru bila sisa ruang tidak cukup
+    const need = 14 + (d.sched.rows.length + 2) * 7;
+    if(y + need > PAGE_BOTTOM){ doc.addPage(); y = 18; }
+    section('Jadwal amortisasi angsuran');
+    const hd = (t, a) => ({ content:t, styles:{ halign:a } });
+    doc.autoTable({
+      ...tableBase, startY:y + 1, showHead:'everyPage', showFoot:'lastPage', rowPageBreak:'avoid',
+      styles:{ ...tableBase.styles, halign:'right' },
+      head:[[hd('Bln','center'), hd('Angsuran','right'), hd('Porsi pokok','right'), hd('Porsi bunga','right'), hd('Sisa pokok','right')]],
+      body:d.sched.rows.map(r => [r.m, fmt(r.installment), fmt(r.prin), fmt(r.interest), fmt(r.remain)]),
+      foot:[['Total', fmt(d.totalObligation), fmt(d.sched.sumP), fmt(d.sched.sumI), '0']],
+      headStyles:{ fillColor:blue, textColor:255, fontStyle:'bold' },
+      footStyles:{ fillColor:soft, textColor:[29,78,216], fontStyle:'bold' },
+      alternateRowStyles:{ fillColor:[250,251,252] },
+      columnStyles:{ 0:{cellWidth:16, halign:'center'}, 1:{cellWidth:41.5}, 2:{cellWidth:41.5}, 3:{cellWidth:41.5}, 4:{cellWidth:41.5} },
+      didParseCell(h){ if(h.section === 'foot' && h.column.index === 0) h.cell.styles.halign = 'center'; },
+      didDrawPage(h){
+        if(h.pageNumber > 1 || h.cursor && h.pageNumber > 1){
+          doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...gray);
+          doc.text('Simulasi Kredit & Amortisasi (lanjutan)', M, 10);
         }
       }
+    });
 
-      // 6. Hitung Angsuran Anuitas & Pembulatan ke atas kelipatan Rp 1.000
-      const r = effMonthlyPct / 100;
-      let rawInstallment = 0;
-      if (totalPrincipal > 0) {
-        if (r > 0) {
-          rawInstallment = (totalPrincipal * r) / (1 - Math.pow(1 + r, -tenor));
-        } else {
-          rawInstallment = totalPrincipal / tenor;
-        }
-      }
-
-      const installment = totalPrincipal > 0 ? Math.ceil(rawInstallment / 1000) * 1000 : 0;
-      const totalObligation = installment * tenor;
-      const totalInterest = Math.max(0, totalObligation - totalPrincipal);
-
-      // Ekuivalen Flat Bulanan
-      const flatMonthlyPct = (totalPrincipal > 0 && tenor > 0)
-        ? ((totalInterest / totalPrincipal) / tenor) * 100
-        : 0;
-
-      // 7. Update UI Summary Cards
-      document.getElementById('res-installment').textContent = formatRp(installment);
-      document.getElementById('res-tenor-label').textContent = `Tenor ${tenor} Bulan`;
-
-      document.getElementById('res-tdp').textContent = formatRp(tdp);
-      document.getElementById('res-tdp-desc').textContent = state.adminMode === 'upfront'
-        ? 'DP + Admin Bayar di Awal'
-        : 'DP saja (Admin masuk pokok)';
-
-      document.getElementById('res-principal').textContent = formatRp(totalPrincipal);
-      document.getElementById('res-principal-desc').textContent = state.adminMode === 'loan'
-        ? 'NTF + Asuransi + Admin Loan'
-        : 'NTF + Asuransi Jiwa & Barang';
-
-      // 8. Update Rincian Struktur Pembiayaan
-      document.getElementById('det-otr').textContent = formatRp(otr);
-      document.getElementById('det-dp').textContent = '- ' + formatRp(dp);
-      document.getElementById('det-ntf').textContent = formatRp(ntf);
-      document.getElementById('det-life-rate').textContent = lifeRatePct.toFixed(1).replace('.', ',') + '%';
-      document.getElementById('det-life-ins').textContent = formatRp(lifeIns);
-      document.getElementById('det-asset-ins').textContent = formatRp(assetIns);
-
-      const adminTag = state.adminMode === 'upfront' ? 'Awal' : 'As Loan';
-      const adminPctInfo = state.adminType === 'pct' ? ` (${state.adminPct}%)` : '';
-      document.getElementById('det-admin-mode-tag').textContent = adminTag + adminPctInfo;
-      document.getElementById('det-admin').textContent = formatRp(adminFee);
-
-      document.getElementById('det-rates').textContent =
-        `${effMonthlyPct.toFixed(2).replace('.', ',')}% Eff / ${flatMonthlyPct.toFixed(2).replace('.', ',')}% Flat`;
-      document.getElementById('det-tenor-bunga').textContent = tenor;
-      document.getElementById('det-total-interest').textContent = formatRp(totalInterest);
-      document.getElementById('det-total-obligation').textContent = formatRp(totalObligation);
-
-      // 9. Generate Tabel Amortisasi
-      renderAmortizationTable(totalPrincipal, installment, tenor);
+    // Footer tiap halaman
+    const n = doc.getNumberOfPages();
+    for(let i = 1; i <= n; i++){
+      doc.setPage(i);
+      doc.setDrawColor(229,231,235); doc.line(M, 286, W - M, 286);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...gray);
+      doc.text(DISCLAIMER, M, 291);
+      doc.text(`Halaman ${i} dari ${n}`, W - M, 291, { align:'right' });
     }
+    doc.save(baseName() + '.pdf');
+  } catch(err){
+    console.error(err);
+    toast('Gagal membuat PDF. Periksa koneksi internet lalu coba lagi.');
+  } finally {
+    busy(btn, false);
+  }
+}
 
-    function renderAmortizationTable(principal, installment, tenor) {
-      const tbody = document.getElementById('amortization-tbody');
-      const tfoot = document.getElementById('amortization-tfoot');
+/* ================= Ekspor: JPEG (digambar langsung di canvas) ================= */
+function drawReport(ctx, d, H, S){
+  const W = 1000, P = 48, CW = W - 2 * P;
+  const FONT = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+  const F = (w, s) => `${w} ${s}px ${FONT}`;
+  ctx.setTransform(S, 0, 0, S, 0, 0);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
 
-      if (principal <= 0 || installment <= 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">Masukkan harga barang untuk melihat jadwal angsuran</td></tr>`;
-        tfoot.innerHTML = '';
-        return;
-      }
+  const T = (t, x, y, o = {}) => {
+    ctx.font = o.f || F(400, 16); ctx.fillStyle = o.c || '#111827';
+    ctx.textAlign = o.a || 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText(t, x, y);
+  };
+  const fit = (t, maxW, f) => {
+    ctx.font = f;
+    if(ctx.measureText(t).width <= maxW) return t;
+    while(t.length > 1 && ctx.measureText(t + '...').width > maxW) t = t.slice(0, -1);
+    return t + '...';
+  };
+  const rr = (x, y, w, h, r, fill, stroke) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    if(fill){ ctx.fillStyle = fill; ctx.fill(); }
+    if(stroke){ ctx.strokeStyle = stroke; ctx.lineWidth = 1.5; ctx.stroke(); }
+  };
+  const hl = y => { ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(P, y); ctx.lineTo(W - P, y); ctx.stroke(); };
 
-      // Cari IRR efektif bulanan aktual setelah angsuran dibulatkan ke kelipatan 1.000
-      let actualR = 0;
-      const targetRatio = installment / principal;
-      if (targetRatio > (1 / tenor)) {
-        let guess = 0.05;
-        for (let i = 0; i < 60; i++) {
-          const pow = Math.pow(1 + guess, -tenor);
-          const fn = (guess / (1 - pow)) - targetRatio;
-          const dfn = ((1 - pow) - guess * tenor * Math.pow(1 + guess, -tenor - 1)) / Math.pow(1 - pow, 2);
-          const next = guess - fn / dfn;
-          if (Math.abs(next - guess) < 1e-10) {
-            guess = next;
-            break;
-          }
-          guess = next;
-        }
-        actualR = Math.max(0, guess);
-      }
+  // Kop
+  ctx.fillStyle = '#2563eb'; ctx.fillRect(0, 0, W, 116);
+  T('Simulasi Kredit & Amortisasi', P, 54, { f:F(700, 32), c:'#fff' });
+  T(`${d.catDisplay}  |  Tenor ${d.tenor} bulan`, P, 88, { f:F(400, 17), c:'#dbeafe' });
+  T(stamp(), W - P, 88, { f:F(400, 15), c:'#dbeafe', a:'right' });
 
-      let remainingPrincipal = principal;
-      let sumPrincipal = 0;
-      let sumInterest = 0;
-      let rowsHtml = '';
+  // Ringkasan
+  let y = 144;
+  const bw = (CW - 32) / 3, bh = 120;
+  [
+    ['Angsuran per bulan', formatRp(d.installment), `selama ${d.tenor} bulan`, true],
+    ['Bayar pertama (TDP)', formatRp(d.tdp), d.tdpNote, false],
+    ['Total pokok hutang', formatRp(d.totalPrincipal), d.principalNote, false]
+  ].forEach((b, i) => {
+    const x = P + i * (bw + 16);
+    rr(x, y, bw, bh, 14, b[3] ? '#eff6ff' : '#fff', b[3] ? '#93c5fd' : '#e5e7eb');
+    T(b[0], x + 18, y + 34, { f:F(600, 15), c:'#6b7280' });
+    T(b[1], x + 18, y + 74, { f:F(800, b[3] ? 30 : 24), c:b[3] ? '#1d4ed8' : '#111827' });
+    T(fit(b[2], bw - 36, F(400, 13)), x + 18, y + 100, { f:F(400, 13), c:'#6b7280' });
+  });
+  y += bh + 44;
 
-      for (let m = 1; m <= tenor; m++) {
-        let interestPortion = 0;
-        let principalPortion = 0;
+  const section = title => { T(title, P, y, { f:F(700, 21) }); y += 14; hl(y); y += 6; };
 
-        if (m < tenor) {
-          interestPortion = Math.round(remainingPrincipal * actualR);
-          principalPortion = installment - interestPortion;
-          if (principalPortion > remainingPrincipal) {
-            principalPortion = remainingPrincipal;
-            interestPortion = installment - principalPortion;
-          }
-          remainingPrincipal -= principalPortion;
-        } else {
-          principalPortion = remainingPrincipal;
-          interestPortion = Math.max(0, installment - principalPortion);
-          remainingPrincipal = 0;
-        }
+  // Parameter (label di atas, nilai di bawah)
+  section('Parameter simulasi');
+  const half = (CW - 32) / 2;
+  [
+    [['Kategori', d.catDisplay], ['Harga barang (OTR)', formatRp(d.otr)]],
+    [['Tenor', `${d.tenor} bulan`], ['Uang muka (DP)', `${formatRp(d.dp)} (${d.dpPctText}%)`]],
+    [['Skema bunga', d.rateLabel], ['Biaya admin', `${formatRp(d.adminFee)} (${d.adminModeText})`]]
+  ].forEach(row => {
+    row.forEach((c, i) => {
+      const x = P + i * (half + 32);
+      T(c[0], x, y + 24, { f:F(400, 14), c:'#6b7280' });
+      T(fit(c[1], half, F(700, 17)), x, y + 48, { f:F(700, 17) });
+    });
+    y += 62;
+  });
+  y += 20;
 
-        sumPrincipal += principalPortion;
-        sumInterest += interestPortion;
+  // Rincian
+  section('Rincian pembiayaan');
+  d.breakdown.forEach(r => {
+    const h = 44;
+    if(r.k === 'sub' || r.k === 'total'){ ctx.fillStyle = r.k === 'total' ? '#eff6ff' : '#f8fafc'; ctx.fillRect(P, y, CW, h); }
+    T(r.l, P + 14, y + 28, { f:F(r.k ? 700 : 400, 16), c:'#374151' });
+    T(r.v, W - P - 14, y + 28, { f:F(700, 16), c:r.k === 'total' ? '#1d4ed8' : '#111827', a:'right' });
+    y += h; hl(y);
+  });
+  y += 40;
 
-        rowsHtml += `
-          <tr class="hover:bg-blue-50/40 transition-colors">
-            <td class="py-2.5 px-4 text-center font-bold text-slate-500">${m}</td>
-            <td class="py-2.5 px-4 text-right font-bold text-slate-900">${formatNumberOnly(installment)}</td>
-            <td class="py-2.5 px-4 text-right text-slate-700">${formatNumberOnly(principalPortion)}</td>
-            <td class="py-2.5 px-4 text-right text-amber-600">${formatNumberOnly(interestPortion)}</td>
-            <td class="py-2.5 px-4 text-right font-semibold text-slate-800">${formatNumberOnly(remainingPrincipal)}</td>
-          </tr>
-        `;
-      }
+  // Jadwal
+  section('Jadwal amortisasi angsuran');
+  const colR = [0.30, 0.52, 0.74, 1.0].map(f => P + CW * f - 14);
+  ctx.fillStyle = '#2563eb'; ctx.fillRect(P, y, CW, 46);
+  const hf = F(700, 14);
+  T('Bln', P + CW * 0.075, y + 29, { f:hf, c:'#fff', a:'center' });
+  ['Angsuran','Porsi pokok','Porsi bunga','Sisa pokok'].forEach((t, i) => T(t, colR[i], y + 29, { f:hf, c:'#fff', a:'right' }));
+  y += 46;
+  d.sched.rows.forEach((r, i) => {
+    const h = 40;
+    if(i % 2) { ctx.fillStyle = '#f8fafc'; ctx.fillRect(P, y, CW, h); }
+    T(String(r.m), P + CW * 0.075, y + 26, { f:F(600, 15), c:'#6b7280', a:'center' });
+    T(fmt(r.installment), colR[0], y + 26, { f:F(700, 15), a:'right' });
+    T(fmt(r.prin), colR[1], y + 26, { f:F(400, 15), c:'#047857', a:'right' });
+    T(fmt(r.interest), colR[2], y + 26, { f:F(400, 15), c:'#b45309', a:'right' });
+    T(fmt(r.remain), colR[3], y + 26, { f:F(600, 15), a:'right' });
+    y += h; hl(y);
+  });
+  ctx.fillStyle = '#eff6ff'; ctx.fillRect(P, y, CW, 46);
+  const tf = F(800, 15);
+  T('Total', P + CW * 0.075, y + 29, { f:tf, c:'#1d4ed8', a:'center' });
+  [fmt(d.totalObligation), fmt(d.sched.sumP), fmt(d.sched.sumI), '0'].forEach((t, i) => T(t, colR[i], y + 29, { f:tf, c:'#1d4ed8', a:'right' }));
+  y += 46 + 40;
 
-      tbody.innerHTML = rowsHtml;
-      tfoot.innerHTML = `
-        <tr>
-          <td class="py-3 px-4 text-center">TOTAL</td>
-          <td class="py-3 px-4 text-right text-blue-700">${formatNumberOnly(installment * tenor)}</td>
-          <td class="py-3 px-4 text-right">${formatNumberOnly(sumPrincipal)}</td>
-          <td class="py-3 px-4 text-right text-amber-700">${formatNumberOnly(sumInterest)}</td>
-          <td class="py-3 px-4 text-right">0</td>
-        </tr>
-      `;
-    }
+  T(DISCLAIMER, P, y, { f:F(400, 13), c:'#6b7280' });
+  return y + 24;
+}
 
-    // Reset Form
-    function resetForm() {
-      state.category = 'gadget';
-      state.otr = 5999000;
-      state.dp = 0;
-      state.tenor = 12;
-      state.adminType = 'rp';
-      state.adminRp = 200000;
-      state.adminPct = 5;
-      state.adminMode = 'upfront';
-      state.rateMode = 'auto';
-      state.selectedPromo = 'p099';
-      state.erafoneRate = 2.45;
-      state.manualRateType = 'effective';
-      state.manualRateValue = 3.50;
-      state.assetInsMode = 'auto';
-      state.assetInsManual = 500000;
+async function downloadJPEG(){
+  const btn = $('#btn-jpg');
+  if(!last || !last.installment) return;
+  busy(btn, true, 'Membuat JPEG...');
+  try{
+    const S = 2, W = 1000;
+    const probe = document.createElement('canvas').getContext('2d');
+    const H = Math.ceil(drawReport(probe, last, 100000, 1));
+    const cv = document.createElement('canvas');
+    cv.width = W * S; cv.height = H * S;
+    drawReport(cv.getContext('2d'), last, H, S);
+    const blob = await new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error('toBlob gagal')), 'image/jpeg', 0.92));
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = baseName() + '.jpg';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  } catch(err){
+    console.error(err);
+    toast('Gagal membuat JPEG. Coba lagi.');
+  } finally {
+    busy(btn, false);
+  }
+}
 
-      document.getElementById('input-otr').value = '5.999.000';
-      document.getElementById('input-dp').value = '0';
-      document.getElementById('input-admin-rp').value = '200.000';
-      document.getElementById('input-admin-pct').value = '5';
-      document.getElementById('input-manual-rate').value = '3.50';
-      document.getElementById('input-ins-manual').value = '500.000';
+/* ================= Init ================= */
+$('#promo-list').innerHTML = PROMOS.map(p =>
+  `<button type="button" class="opt" data-key="selectedPromo" data-val="${p.id}">
+     <div class="r"><b>${p.rate}</b><span class="t">${p.tag}</span></div>
+     <div class="d">${p.desc}</div>
+   </button>`).join('');
 
-      setCategory('gadget');
-      setTenor(12);
-      setAdminType('rp');
-      setAdminMode('upfront');
-      setRateMode('auto');
-      setManualRateType('effective');
-      setAssetInsMode('auto');
-    }
+$('#btn-reset').addEventListener('click', resetForm);
+$('#btn-pdf').addEventListener('click', downloadPDF);
+$('#btn-jpg').addEventListener('click', downloadJPEG);
+$('#btn-free-admin').addEventListener('click', applyFreeAdmin);
+$('#btn-goto').addEventListener('click', () => $('#hero').scrollIntoView({ behavior:'smooth', block:'start' }));
 
-    // Download Snapshot PDF
-    async function downloadSnapshotPDF() {
-      const btn = document.getElementById('btn-download-pdf');
-      const icon = document.getElementById('pdf-icon');
-      const spinner = document.getElementById('pdf-spinner');
-      const btnText = document.getElementById('pdf-btn-text');
-      const captureArea = document.getElementById('pdf-capture-area');
-      const pdfHeader = document.getElementById('pdf-snapshot-header');
-      const scrollWrapper = document.getElementById('amortization-scroll-wrapper');
+// Bar angsuran di HP: sembunyi saat kartu hasil sudah terlihat
+if('IntersectionObserver' in window){
+  new IntersectionObserver(([e]) => $('#mbar').classList.toggle('off', e.isIntersecting)).observe($('#hero'));
+} else { $('#mbar').classList.remove('off'); }
 
-      if (!captureArea || typeof html2pdf === 'undefined') return;
-
-      // Loading state
-      btn.disabled = true;
-      btn.classList.add('opacity-75', 'cursor-not-allowed');
-      icon.classList.add('hidden');
-      spinner.classList.remove('hidden');
-      btnText.textContent = 'Membuat PDF...';
-
-      // Set PDF header info & timestamp
-      const catLabel = state.category === 'gadget' ? 'Gadget' : 'Elektronik';
-      const catDisplay = state.category === 'gadget' ? 'Gadget / HP' : 'Elektronik Rumah';
-      document.getElementById('pdf-meta-subtitle').textContent = `Kategori: ${catDisplay} • Tenor: ${state.tenor} Bulan • Harga OTR: ${formatRp(state.otr)}`;
-      
-      const now = new Date();
-      document.getElementById('pdf-timestamp').textContent = now.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }) + ' WIB';
-
-      // Prepare layout for clean full-height PDF capture
-      pdfHeader.classList.remove('hidden');
-      scrollWrapper.classList.remove('max-h-[420px]', 'overflow-x-auto');
-
-      const filename = `Simulasi-Kredit-${catLabel}-${state.tenor}Bln.pdf`;
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      try {
-        await html2pdf().set(opt).from(captureArea).save();
-      } catch (err) {
-        console.error('Gagal membuat PDF:', err);
-      } finally {
-        // Restore original UI state
-        pdfHeader.classList.add('hidden');
-        scrollWrapper.classList.add('max-h-[420px]', 'overflow-x-auto');
-        btn.disabled = false;
-        btn.classList.remove('opacity-75', 'cursor-not-allowed');
-        icon.classList.remove('hidden');
-        spinner.classList.add('hidden');
-        btnText.textContent = 'Download PDF';
-      }
-    }
-
-    // Inisialisasi awal
-    calculate();
-  </script>
+fillInputs();
+refresh();
+</script>
 </body>
 </html>
